@@ -1,0 +1,230 @@
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import React, { useMemo } from 'react';
+import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+
+import { Avatar, Button, Card, LoadingState, Pill, Screen, Text } from '@/components';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { useAllBadges } from '@/features/badges/hooks';
+import { useMissionHistory } from '@/features/missions/hooks';
+import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
+import { useProfileStats, useUploadAvatar, useUserBadges } from '@/features/profile/hooks';
+import { LevelHeader } from '@/features/profile/components/LevelHeader';
+import { difficultyMeta, relativeTime } from '@/lib/format';
+import { colors, spacing } from '@/theme';
+
+export default function ProfileScreen() {
+  const router = useRouter();
+  const { profile, isAdmin, signOut, refreshProfile, session } = useAuth();
+  const userId = session?.user.id;
+  const badges = useAllBadges();
+  const earned = useUserBadges(userId);
+  const stats = useProfileStats(userId);
+  const history = useMissionHistory(userId);
+  const uploadAvatar = useUploadAvatar();
+
+  const earnedIds = useMemo(
+    () => new Set((earned.data ?? []).map((e) => e.badge_id)),
+    [earned.data],
+  );
+
+  async function changeAvatar() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      try {
+        await uploadAvatar.mutateAsync(result.assets[0].uri);
+      } catch (err) {
+        Alert.alert('Upload failed', err instanceof Error ? err.message : 'Try again.');
+      }
+    }
+  }
+
+  if (!profile) return <LoadingState />;
+
+  return (
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl refreshing={false} onRefresh={refreshProfile} tintColor={colors.primary} />
+      }
+    >
+      <View style={styles.head}>
+        <Pressable onPress={changeAvatar}>
+          <Avatar
+            uri={profile.avatar_url}
+            name={profile.display_name || profile.username}
+            size={88}
+            frame={profile.profile_frame}
+          />
+          <View style={styles.editAvatar}>
+            <Ionicons name="camera" size={14} color={colors.textPrimary} />
+          </View>
+        </Pressable>
+        <Text variant="title">{profile.display_name || profile.username}</Text>
+        <Text variant="bodyMuted" color={colors.textMuted}>
+          @{profile.username}
+        </Text>
+        {profile.longest_streak > 0 ? (
+          <Pill
+            label={`Best streak: ${profile.longest_streak} days`}
+            color={colors.warning}
+            icon={<Ionicons name="flame" size={13} color={colors.warning} />}
+          />
+        ) : null}
+      </View>
+
+      <Card elevated style={styles.headerCard}>
+        <LevelHeader profile={profile} />
+      </Card>
+
+      {/* Badges */}
+      <Section title="Badges" trailing={`${earnedIds.size}/${badges.data?.length ?? 0}`}>
+        {badges.isLoading ? (
+          <LoadingState />
+        ) : (
+          <BadgeGrid badges={badges.data ?? []} earnedIds={earnedIds} />
+        )}
+      </Section>
+
+      {/* Stats */}
+      <Section title="Stats">
+        <View style={styles.statsGrid}>
+          <StatBox label="Approved quests" value={stats.data?.totalApproved ?? 0} />
+          <StatBox label="Categories" value={stats.data?.byCategory.length ?? 0} />
+          <StatBox
+            label="Hardest cleared"
+            value={
+              stats.data?.byDifficulty.length
+                ? (difficultyMeta[
+                    [...stats.data.byDifficulty].sort(
+                      (a, b) => order(b.difficulty) - order(a.difficulty),
+                    )[0]?.difficulty as 'easy'
+                  ]?.label ?? '—')
+                : '—'
+            }
+          />
+        </View>
+      </Section>
+
+      {/* History */}
+      <Section title="Recent activity">
+        {(history.data?.length ?? 0) === 0 ? (
+          <Text variant="bodyMuted" color={colors.textMuted}>
+            No quests completed yet — your first one is waiting on the Today tab.
+          </Text>
+        ) : (
+          history.data?.slice(0, 8).map((item) => (
+            <View key={item.id} style={styles.historyRow}>
+              <Ionicons
+                name={
+                  item.status === 'approved'
+                    ? 'checkmark-circle'
+                    : item.status === 'rejected'
+                      ? 'close-circle'
+                      : 'hourglass'
+                }
+                size={18}
+                color={
+                  item.status === 'approved'
+                    ? colors.success
+                    : item.status === 'rejected'
+                      ? colors.danger
+                      : colors.warning
+                }
+              />
+              <Text variant="bodyMuted" style={styles.flex} numberOfLines={1}>
+                {item.mission?.title ?? 'Quest'}
+              </Text>
+              <Text variant="caption" color={colors.textMuted}>
+                {relativeTime(item.created_at)}
+              </Text>
+            </View>
+          ))
+        )}
+      </Section>
+
+      <View style={styles.actions}>
+        {isAdmin ? (
+          <Button
+            label="Admin dashboard"
+            variant="secondary"
+            fullWidth
+            onPress={() => router.push('/admin')}
+            icon={<Ionicons name="shield-checkmark" size={18} color={colors.textPrimary} />}
+          />
+        ) : null}
+        <Button label="Log out" variant="ghost" fullWidth onPress={signOut} />
+      </View>
+    </Screen>
+  );
+}
+
+function order(d: string): number {
+  return { easy: 1, medium: 2, hard: 3, extreme: 4 }[d] ?? 0;
+}
+
+function Section({
+  title,
+  trailing,
+  children,
+}: {
+  title: string;
+  trailing?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHead}>
+        <Text variant="heading">{title}</Text>
+        {trailing ? (
+          <Text variant="caption" color={colors.textMuted}>
+            {trailing}
+          </Text>
+        ) : null}
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function StatBox({ label, value }: { label: string; value: string | number }) {
+  return (
+    <Card style={styles.statBox}>
+      <Text variant="title">{value}</Text>
+      <Text variant="caption" color={colors.textMuted} center>
+        {label}
+      </Text>
+    </Card>
+  );
+}
+
+const styles = StyleSheet.create({
+  head: { alignItems: 'center', gap: spacing.xs, marginTop: spacing.md },
+  editAvatar: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.background,
+  },
+  headerCard: { marginTop: spacing.lg },
+  section: { marginTop: spacing.xl, gap: spacing.md },
+  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statsGrid: { flexDirection: 'row', gap: spacing.md },
+  statBox: { flex: 1, alignItems: 'center', gap: spacing.xs },
+  historyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  flex: { flex: 1 },
+  actions: { marginTop: spacing.xxl, gap: spacing.sm },
+});
