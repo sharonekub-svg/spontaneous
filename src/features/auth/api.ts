@@ -21,6 +21,14 @@ export async function signUpWithEmail(params: {
   });
   if (error) throw error;
 
+  // Supabase doesn't error when the email is already registered (to avoid
+  // leaking which emails exist) — it returns a user with an empty identities
+  // array. Detect that and tell the user to log in, instead of falling through
+  // to the sign-in below and surfacing a confusing "invalid credentials".
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    throw new Error('כתובת האימייל הזו כבר רשומה. עברו למסך ההתחברות.');
+  }
+
   // Hosted GoTrue may not return a session on sign-up (it depends on the
   // project's email-confirmation setting). New accounts are auto-confirmed at
   // the database level, so if no session came back, sign in immediately to log
