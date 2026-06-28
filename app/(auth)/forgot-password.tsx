@@ -13,16 +13,16 @@ export default function ForgotPasswordScreen() {
 
   async function handleReset() {
     if (!email) {
-      Alert.alert('Enter your email', 'We need your email to send a reset link.');
+      Alert.alert('הזינו אימייל', 'אנחנו צריכים את האימייל כדי לשלוח קישור איפוס.');
       return;
     }
     setLoading(true);
     try {
       await sendPasswordReset(email.trim());
-      Alert.alert('Check your inbox', 'If that email exists, a reset link is on its way.');
+      Alert.alert('בדקו את הדואר', 'אם האימייל קיים, קישור איפוס בדרך.');
       router.back();
     } catch (err) {
-      Alert.alert('Could not send', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }
@@ -32,17 +32,17 @@ export default function ForgotPasswordScreen() {
     <Screen scroll gradient>
       <View style={styles.hero}>
         <Text variant="overline" color={colors.primary}>
-          Reset password
+          איפוס סיסמה
         </Text>
-        <Text variant="title">Forgot it? No worries.</Text>
+        <Text variant="title">שכחתם? אין בעיה.</Text>
         <Text variant="bodyMuted" color={colors.textSecondary}>
-          Enter your email and we’ll send a link to set a new one.
+          הזינו אימייל ונשלח קישור להגדרת סיסמה חדשה.
         </Text>
       </View>
 
       <View style={styles.form}>
         <Input
-          label="Email"
+          label="אימייל"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -50,13 +50,13 @@ export default function ForgotPasswordScreen() {
           placeholder="you@example.com"
         />
         <Button
-          label="Send reset link"
+          label="שלחו קישור איפוס"
           onPress={handleReset}
           loading={loading}
           fullWidth
           size="lg"
         />
-        <Button label="Back to login" variant="ghost" onPress={() => router.back()} fullWidth />
+        <Button label="חזרה להתחברות" variant="ghost" onPress={() => router.back()} fullWidth />
       </View>
     </Screen>
   );

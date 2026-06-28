@@ -20,4 +20,5 @@ export const env = {
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   ),
   googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
+  sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN ?? '',
 } as const;

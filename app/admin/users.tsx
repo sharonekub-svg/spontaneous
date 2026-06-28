@@ -16,14 +16,12 @@ export default function AdminUsersScreen() {
 
   function confirmBan(user: ProfileRow) {
     Alert.alert(
-      user.is_banned ? 'Unban user?' : 'Ban user?',
-      user.is_banned
-        ? `Restore access for @${user.username}?`
-        : `Block @${user.username} from the app?`,
+      user.is_banned ? 'לבטל חסימה?' : 'לחסום משתמש?',
+      user.is_banned ? `לשחזר גישה ל-@${user.username}?` : `לחסום את @${user.username} מהאפליקציה?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'ביטול', style: 'cancel' },
         {
-          text: user.is_banned ? 'Unban' : 'Ban',
+          text: user.is_banned ? 'ביטול חסימה' : 'חסימה',
           style: user.is_banned ? 'default' : 'destructive',
           onPress: () => ban.mutate({ id: user.id, banned: !user.is_banned }),
         },
@@ -33,10 +31,10 @@ export default function AdminUsersScreen() {
 
   return (
     <Screen scroll>
-      <Text variant="title">Users</Text>
+      <Text variant="title">משתמשים</Text>
       <View style={styles.search}>
         <Input
-          placeholder="Search by username"
+          placeholder="חיפוש לפי שם משתמש"
           value={query}
           onChangeText={setQuery}
           autoCapitalize="none"
@@ -60,10 +58,11 @@ export default function AdminUsersScreen() {
                   <View style={styles.flex}>
                     <Text variant="subheading">{user.display_name || user.username}</Text>
                     <Text variant="caption" color={colors.textMuted}>
-                      Lv {user.level} · {compactNumber(user.points)} pts · 🔥 {user.current_streak}
+                      רמה {user.level} · {compactNumber(user.points)} נק׳ · רצף{' '}
+                      {user.current_streak}
                     </Text>
                   </View>
-                  {user.is_banned ? <Pill label="Banned" color={colors.danger} /> : null}
+                  {user.is_banned ? <Pill label="חסום" color={colors.danger} /> : null}
                   <Ionicons
                     name={open ? 'chevron-up' : 'chevron-down'}
                     size={20}
@@ -82,7 +81,7 @@ export default function AdminUsersScreen() {
                       }
                     />
                     <Button
-                      label="+500 pts"
+                      label="+500 נק׳"
                       variant="secondary"
                       size="sm"
                       onPress={() =>
@@ -90,13 +89,13 @@ export default function AdminUsersScreen() {
                       }
                     />
                     <Button
-                      label="Reset streak"
+                      label="איפוס רצף"
                       variant="secondary"
                       size="sm"
                       onPress={() => resetStreak.mutate(user.id)}
                     />
                     <Button
-                      label={user.is_banned ? 'Unban' : 'Ban'}
+                      label={user.is_banned ? 'ביטול חסימה' : 'חסימה'}
                       variant={user.is_banned ? 'secondary' : 'danger'}
                       size="sm"
                       onPress={() => confirmBan(user)}

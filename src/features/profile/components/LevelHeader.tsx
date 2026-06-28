@@ -17,7 +17,7 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
       <View style={styles.levelRow}>
         <View style={styles.levelBadge}>
           <Text variant="overline" color={colors.textInverse}>
-            LVL
+            רמה
           </Text>
           <Text variant="heading" color={colors.textInverse}>
             {profile.level}
@@ -29,7 +29,7 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
               {compactNumber(progress.xpIntoLevel)} / {compactNumber(progress.xpForThisLevel)} XP
             </Text>
             <Text variant="caption" color={colors.textMuted}>
-              Next: Lv {progress.level + 1}
+              הבא: רמה {progress.level + 1}
             </Text>
           </View>
           <ProgressBar progress={progress.progress} />
@@ -41,19 +41,19 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
           icon="cash"
           color={colors.reward}
           value={compactNumber(profile.points)}
-          label="Points"
+          label="נקודות"
         />
         <Stat
           icon="flame"
           color={colors.warning}
           value={String(profile.current_streak)}
-          label="Streak"
+          label="רצף"
         />
         <Stat
           icon="checkmark-done"
           color={colors.success}
           value={String(profile.missions_completed)}
-          label="Quests"
+          label="משימות"
         />
       </View>
     </View>

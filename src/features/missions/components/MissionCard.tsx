@@ -49,12 +49,6 @@ export function MissionCard({ mission, onPress, compact }: MissionCardProps) {
         <DifficultyTag difficulty={mission.difficulty} />
         <View style={styles.rewards}>
           <View style={styles.reward}>
-            <Ionicons name="cash" size={14} color={colors.reward} />
-            <Text variant="caption" color={colors.reward}>
-              {mission.base_points}
-            </Text>
-          </View>
-          <View style={styles.reward}>
             <Ionicons name="flash" size={14} color={colors.primary} />
             <Text variant="caption" color={colors.primary}>
               {mission.xp_reward} XP

@@ -1,23 +1,27 @@
 import type { Difficulty, Mood } from '@/types/database.types';
 
 export const moodMeta: Record<Mood, { label: string; emoji: string; blurb: string }> = {
-  not_today: { label: 'Not today', emoji: '😌', blurb: 'Keep it gentle and easy.' },
-  a_little: { label: 'A little', emoji: '🙂', blurb: 'A small nudge out the door.' },
+  not_today: { label: 'לא היום', emoji: '', blurb: 'נשמור על קליל ועדין. (10 נקודות)' },
+  a_little: { label: 'קצת', emoji: '', blurb: 'דחיפה קטנה החוצה. (25 נקודות)' },
   pretty_spontaneous: {
-    label: 'Pretty spontaneous',
-    emoji: '😎',
-    blurb: 'Bring on a real challenge.',
+    label: 'די ספונטני',
+    emoji: '',
+    blurb: 'מביא אתגר אמיתי. (50 נקודות)',
   },
-  crazy: { label: 'Give me something crazy', emoji: '🔥', blurb: 'No limits. Let’s go big.' },
+  crazy: {
+    label: 'תנו לי משהו מטורף',
+    emoji: '',
+    blurb: 'בלי גבולות. הולכים על גדול. (100 נקודות)',
+  },
 };
 
 export const moodOrder: Mood[] = ['not_today', 'a_little', 'pretty_spontaneous', 'crazy'];
 
 export const difficultyMeta: Record<Difficulty, { label: string; emoji: string }> = {
-  easy: { label: 'Easy', emoji: '🟢' },
-  medium: { label: 'Medium', emoji: '🔵' },
-  hard: { label: 'Hard', emoji: '🟠' },
-  extreme: { label: 'Extreme', emoji: '🔴' },
+  easy: { label: 'קל', emoji: '' },
+  medium: { label: 'בינוני', emoji: '' },
+  hard: { label: 'קשה', emoji: '' },
+  extreme: { label: 'קיצוני', emoji: '' },
 };
 
 export function compactNumber(value: number): string {
@@ -30,12 +34,12 @@ export function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
   const diff = Date.now() - then;
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return 'הרגע';
+  if (mins < 60) return `לפני ${mins} דק׳`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `לפני ${hrs} שע׳`;
   const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return `לפני ${days} ימים`;
   return new Date(iso).toLocaleDateString();
 }
 

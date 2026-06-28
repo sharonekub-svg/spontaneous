@@ -24,14 +24,14 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Overview',
+          title: 'סקירה',
           tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="review"
         options={{
-          title: 'Review',
+          title: 'בדיקה',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="checkmark-done" size={size} color={color} />
           ),
@@ -40,14 +40,14 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="missions"
         options={{
-          title: 'Missions',
+          title: 'משימות',
           tabBarIcon: ({ color, size }) => <Ionicons name="flag" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="users"
         options={{
-          title: 'Users',
+          title: 'משתמשים',
           tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
         }}
       />

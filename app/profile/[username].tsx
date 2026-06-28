@@ -42,7 +42,7 @@ export default function PublicProfileScreen() {
   if (profileQuery.isError || !profileQuery.data) {
     return (
       <Screen>
-        <ErrorState message="Profile not found." onRetry={() => profileQuery.refetch()} />
+        <ErrorState message="הפרופיל לא נמצא." onRetry={() => profileQuery.refetch()} />
       </Screen>
     );
   }
@@ -53,7 +53,7 @@ export default function PublicProfileScreen() {
     <Screen scroll>
       <Pressable onPress={() => router.back()} style={styles.back}>
         <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-        <Text variant="body">Back</Text>
+        <Text variant="body">חזרה</Text>
       </Pressable>
 
       <View style={styles.head}>
@@ -74,7 +74,7 @@ export default function PublicProfileScreen() {
         ) : null}
         {profile.longest_streak > 0 ? (
           <Pill
-            label={`Best streak: ${profile.longest_streak} days`}
+            label={`הרצף הטוב ביותר: ${profile.longest_streak} ימים`}
             color={colors.warning}
             icon={<Ionicons name="flame" size={13} color={colors.warning} />}
           />
@@ -86,7 +86,7 @@ export default function PublicProfileScreen() {
       </Card>
 
       <View style={styles.section}>
-        <Text variant="heading">Badges</Text>
+        <Text variant="heading">תגים</Text>
         <BadgeGrid badges={badges.data ?? []} earnedIds={earnedIds} />
       </View>
     </Screen>

@@ -36,7 +36,7 @@ export default function NotificationsScreen() {
   return (
     <Screen scroll>
       <View style={styles.head}>
-        <Text variant="title">Notifications</Text>
+        <Text variant="title">התראות</Text>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="close" size={26} color={colors.textPrimary} />
         </Pressable>
@@ -47,8 +47,8 @@ export default function NotificationsScreen() {
       ) : (data?.length ?? 0) === 0 ? (
         <EmptyState
           icon="notifications-off"
-          title="All caught up"
-          message="Quest updates, approvals, and badges will show up here."
+          title="הכול מעודכן"
+          message="עדכוני משימות, אישורים ותגים יופיעו כאן."
         />
       ) : (
         <View style={styles.list}>
