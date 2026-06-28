@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
-import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button, Input, Text } from '@/components';
 import { colors, radius, spacing } from '@/theme';
@@ -30,12 +30,35 @@ const PROOF_LABELS: Record<ProofType, { label: string; icon: keyof typeof Ionico
 
 /** Captures mission proof in the selected format and emits a ready-to-upload payload. */
 export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerProps) {
-  const [type, setType] = useState<ProofType>(allowed[0] ?? 'text');
+  // Voice proof relies on expo-av recording, which isn't available on web —
+  // drop it from the options there so the user is never offered a dead button.
+  const proofTypes = useMemo(
+    () => (Platform.OS === 'web' ? allowed.filter((t) => t !== 'voice') : allowed),
+    [allowed],
+  );
+  const [type, setType] = useState<ProofType>(proofTypes[0] ?? 'text');
   const [text, setText] = useState('');
   const [media, setMedia] = useState<ProofPayload['media']>();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
   async function pickMedia(kind: 'photo' | 'video') {
+    // On web there's no reliable in-app camera; pick from the file system
+    // instead (the browser file dialog can still offer the camera on mobile).
+    if (Platform.OS === 'web') {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: kind === 'photo' ? ['images'] : ['videos'],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setMedia({
+          uri: asset.uri,
+          contentType: kind === 'photo' ? 'image/jpeg' : 'video/mp4',
+          extension: kind === 'photo' ? 'jpg' : 'mp4',
+        });
+      }
+      return;
+    }
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Camera needed', 'Allow camera access to capture proof.');
@@ -104,7 +127,7 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
       <Text variant="subheading">Submit your proof</Text>
 
       <View style={styles.typeRow}>
-        {allowed.map((t) => {
+        {proofTypes.map((t) => {
           const active = t === type;
           const meta = PROOF_LABELS[t];
           return (
