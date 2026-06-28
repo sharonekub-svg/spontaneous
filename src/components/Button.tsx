@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { colors, radius, spacing, typography } from '@/theme';
@@ -59,7 +59,12 @@ export function Button({
         scale.value = withSpring(1, { damping: 15, stiffness: 400 });
       }}
       onPress={() => {
-        if (haptic) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        // Haptics.impactAsync throws synchronously on web ("not available on
+        // web"), which would swallow the press and stop onPress from ever
+        // running. Guard to native and swallow any async rejection.
+        if (haptic && Platform.OS !== 'web') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        }
         onPress?.();
       }}
       style={[

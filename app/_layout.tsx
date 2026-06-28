@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthGate } from '@/features/auth/AuthGate';
+import { installWebAlert } from '@/lib/alert';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { queryClient } from '@/lib/queryClient';
@@ -21,6 +22,9 @@ I18nManager.forceRTL(true);
 
 // Initialise error tracking as early as possible.
 initSentry();
+
+// Make Alert.alert actually show on web (RN Web ships a no-op Alert).
+installWebAlert();
 
 SplashScreen.preventAutoHideAsync();
 
