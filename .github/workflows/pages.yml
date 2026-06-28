@@ -1,0 +1,56 @@
+name: Deploy web to GitHub Pages
+
+# Builds the Expo web export and publishes it to GitHub Pages so there's a live,
+# publicly accessible instance of the app. Uses the repo's own GITHUB_TOKEN —
+# no external secrets required. Served under /spontaneous (see app.config.js).
+
+on:
+  push:
+    branches: [claude/spontani-social-app-dqsklc]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Export web bundle
+        env:
+          EXPO_PUBLIC_BASE_URL: /spontaneous
+        run: npx expo export --platform web
+
+      # Stop GitHub Pages' Jekyll from dropping the _expo/ asset directory.
+      - run: touch dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
