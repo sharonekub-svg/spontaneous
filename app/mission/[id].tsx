@@ -92,11 +92,7 @@ export default function MissionDetailScreen() {
 
       <Card elevated style={styles.card}>
         <View style={styles.headerRow}>
-          {mission.category ? (
-            <Pill label={mission.category.name} color={mission.category.color} />
-          ) : (
-            <View />
-          )}
+          <View />
           <DifficultyTag difficulty={mission.difficulty} />
         </View>
         <Text variant="title">{mission.title}</Text>

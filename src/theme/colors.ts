@@ -21,6 +21,7 @@ export const palette = {
   coral500: '#FF6B57',
   pink500: '#EC4899',
   rose500: '#F43F5E',
+  red500: '#FF2E2E',
   mint500: '#22C55E',
   cyan500: '#06B6D4',
 
@@ -59,6 +60,7 @@ export const colors = {
   warning: palette.amber500,
   danger: palette.rose500,
   reward: palette.amber400,
+  streak: palette.red500,
 
   // Difficulty colors used across mission UI.
   difficulty: {

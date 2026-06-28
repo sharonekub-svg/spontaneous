@@ -45,9 +45,10 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
         />
         <Stat
           icon="flame"
-          color={colors.warning}
+          color={colors.streak}
           value={String(profile.current_streak)}
           label="רצף"
+          highlight
         />
         <Stat
           icon="checkmark-done"
@@ -65,17 +66,21 @@ function Stat({
   color,
   value,
   label,
+  highlight,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
   value: string;
   label: string;
+  highlight?: boolean;
 }) {
   return (
-    <View style={styles.stat}>
-      <Ionicons name={icon} size={18} color={color} />
-      <Text variant="subheading">{value}</Text>
-      <Text variant="caption" color={colors.textMuted}>
+    <View style={[styles.stat, highlight && styles.statHighlight]}>
+      <Ionicons name={icon} size={highlight ? 24 : 18} color={color} />
+      <Text variant={highlight ? 'heading' : 'subheading'} color={highlight ? color : undefined}>
+        {value}
+      </Text>
+      <Text variant="caption" color={highlight ? color : colors.textMuted}>
         {label}
       </Text>
     </View>
@@ -105,4 +110,17 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
   },
   stat: { flex: 1, alignItems: 'center', gap: 2 },
+  // Streak gets a glowing red treatment so it reads as the headline stat.
+  statHighlight: {
+    backgroundColor: `${colors.streak}1F`,
+    borderRadius: 14,
+    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.xs,
+    borderWidth: 1,
+    borderColor: `${colors.streak}55`,
+    shadowColor: colors.streak,
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+  },
 });

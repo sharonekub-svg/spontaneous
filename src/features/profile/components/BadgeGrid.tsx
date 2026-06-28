@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components';
 import { colors, radius, spacing } from '@/theme';
@@ -11,7 +11,8 @@ interface BadgeGridProps {
   earnedIds: Set<string>;
 }
 
-/** Shows all badges with earned ones highlighted and locked ones dimmed. */
+/** Shows all badges with earned ones highlighted and locked ones dimmed.
+ *  Tapping a badge explains how to earn it (or that it's already earned). */
 export function BadgeGrid({ badges, earnedIds }: BadgeGridProps) {
   return (
     <View style={styles.grid}>
@@ -20,8 +21,19 @@ export function BadgeGrid({ badges, earnedIds }: BadgeGridProps) {
         const rarityColor = colors.rarity[badge.rarity];
         const locked = !earned;
         const hidden = badge.is_secret && !earned;
+
+        function explain() {
+          const title = hidden ? '???' : badge.name;
+          const body = hidden
+            ? 'הישג נסתר. המשיכו לשחק כדי לגלות אותו.'
+            : earned
+              ? `${badge.description}\n\n✓ כבר השגתם את התג הזה!`
+              : `איך משיגים: ${badge.description}`;
+          Alert.alert(title, body);
+        }
+
         return (
-          <View key={badge.id} style={styles.item}>
+          <Pressable key={badge.id} style={styles.item} onPress={explain}>
             <View
               style={[
                 styles.badge,
@@ -44,7 +56,7 @@ export function BadgeGrid({ badges, earnedIds }: BadgeGridProps) {
             >
               {hidden ? '???' : badge.name}
             </Text>
-          </View>
+          </Pressable>
         );
       })}
     </View>

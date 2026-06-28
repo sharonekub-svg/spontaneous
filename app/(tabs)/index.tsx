@@ -131,11 +131,7 @@ function ActiveMission({
 
       <Card elevated style={styles.missionCard}>
         <View style={styles.missionHeader}>
-          {mission.category ? (
-            <Pill label={mission.category.name} color={mission.category.color} />
-          ) : (
-            <View />
-          )}
+          <View />
           <DifficultyTag difficulty={mission.difficulty} />
         </View>
         <Text variant="title">{mission.title}</Text>
