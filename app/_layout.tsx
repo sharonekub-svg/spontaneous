@@ -25,13 +25,16 @@ initSentry();
 SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
-  const [fontsLoaded] = useFonts({ ...Ionicons.font });
+  const [fontsLoaded, fontError] = useFonts({ ...Ionicons.font });
 
+  // Hide the splash once fonts resolve — whether they loaded or failed. We
+  // never block rendering the navigator on fonts: Expo Router requires the
+  // Root Layout to render a navigator (<Stack>) on its very first render, so
+  // returning null here would crash with "Attempted to navigate before
+  // mounting the Root Layout". Icons simply pop in once the font is ready.
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) return null;
+    if (fontsLoaded || fontError) SplashScreen.hideAsync();
+  }, [fontsLoaded, fontError]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
