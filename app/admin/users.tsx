@@ -17,9 +17,7 @@ export default function AdminUsersScreen() {
   function confirmBan(user: ProfileRow) {
     Alert.alert(
       user.is_banned ? 'לבטל חסימה?' : 'לחסום משתמש?',
-      user.is_banned
-        ? `לשחזר גישה ל-@${user.username}?`
-        : `לחסום את @${user.username} מהאפליקציה?`,
+      user.is_banned ? `לשחזר גישה ל-@${user.username}?` : `לחסום את @${user.username} מהאפליקציה?`,
       [
         { text: 'ביטול', style: 'cancel' },
         {
@@ -60,7 +58,8 @@ export default function AdminUsersScreen() {
                   <View style={styles.flex}>
                     <Text variant="subheading">{user.display_name || user.username}</Text>
                     <Text variant="caption" color={colors.textMuted}>
-                      רמה {user.level} · {compactNumber(user.points)} נק׳ · רצף {user.current_streak}
+                      רמה {user.level} · {compactNumber(user.points)} נק׳ · רצף{' '}
+                      {user.current_streak}
                     </Text>
                   </View>
                   {user.is_banned ? <Pill label="חסום" color={colors.danger} /> : null}

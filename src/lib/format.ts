@@ -8,7 +8,11 @@ export const moodMeta: Record<Mood, { label: string; emoji: string; blurb: strin
     emoji: '',
     blurb: 'מביא אתגר אמיתי. (50 נקודות)',
   },
-  crazy: { label: 'תנו לי משהו מטורף', emoji: '', blurb: 'בלי גבולות. הולכים על גדול. (100 נקודות)' },
+  crazy: {
+    label: 'תנו לי משהו מטורף',
+    emoji: '',
+    blurb: 'בלי גבולות. הולכים על גדול. (100 נקודות)',
+  },
 };
 
 export const moodOrder: Mood[] = ['not_today', 'a_little', 'pretty_spontaneous', 'crazy'];

@@ -17,10 +17,11 @@ Before you start, have ready:
 ## ⬇️ COPY EVERYTHING BELOW THIS LINE ⬇️
 
 You are setting up the live cloud backend for **Spontani**, a React Native (Expo)
-+ Supabase app. The application code is already written and committed in the
-GitHub repo `sharonekub-svg/spontaneous` on branch
-`claude/spontani-social-app-dqsklc`. Your job is to provision the infrastructure
-and connect it to the code. Do NOT rewrite the app — it already exists.
+
+- Supabase app. The application code is already written and committed in the
+  GitHub repo `sharonekub-svg/spontaneous` on branch
+  `claude/spontani-social-app-dqsklc`. Your job is to provision the infrastructure
+  and connect it to the code. Do NOT rewrite the app — it already exists.
 
 ### Context about the repo
 

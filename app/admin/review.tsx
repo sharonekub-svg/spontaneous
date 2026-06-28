@@ -67,11 +67,7 @@ export default function ReviewQueueScreen() {
       {queue.isLoading ? (
         <LoadingState />
       ) : (queue.data?.length ?? 0) === 0 ? (
-        <EmptyState
-          icon="checkmark-done"
-          title="התור ריק"
-          message="אין הגשות ממתינות."
-        />
+        <EmptyState icon="checkmark-done" title="התור ריק" message="אין הגשות ממתינות." />
       ) : (
         <View style={styles.list}>
           {queue.data?.map((item) => (

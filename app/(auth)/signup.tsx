@@ -70,13 +70,7 @@ export default function SignupScreen() {
           secureTextEntry
           placeholder="לפחות 6 תווים"
         />
-        <Button
-          label="צרו חשבון"
-          onPress={handleSignup}
-          loading={loading}
-          fullWidth
-          size="lg"
-        />
+        <Button label="צרו חשבון" onPress={handleSignup} loading={loading} fullWidth size="lg" />
       </View>
 
       <View style={styles.footer}>

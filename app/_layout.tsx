@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthGate } from '@/features/auth/AuthGate';
+import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { queryClient } from '@/lib/queryClient';
 import { colors } from '@/theme';
@@ -18,9 +19,12 @@ import { colors } from '@/theme';
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
+// Initialise error tracking as early as possible.
+initSentry();
+
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({ ...Ionicons.font });
 
   useEffect(() => {
@@ -61,3 +65,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);
