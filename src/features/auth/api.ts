@@ -12,7 +12,7 @@ export async function signUpWithEmail(params: {
   password: string;
   username: string;
 }) {
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: params.email,
     password: params.password,
     options: {
@@ -20,6 +20,18 @@ export async function signUpWithEmail(params: {
     },
   });
   if (error) throw error;
+
+  // Hosted GoTrue may not return a session on sign-up (it depends on the
+  // project's email-confirmation setting). New accounts are auto-confirmed at
+  // the database level, so if no session came back, sign in immediately to log
+  // the new user straight into the app instead of bouncing them to /login.
+  if (!data.session) {
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: params.email,
+      password: params.password,
+    });
+    if (signInError) throw signInError;
+  }
 }
 
 export async function signInWithEmail(email: string, password: string) {
