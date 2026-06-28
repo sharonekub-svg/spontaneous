@@ -41,7 +41,7 @@ export function LeaderboardRow({
           {entry.display_name || entry.username}
         </Text>
         <Text variant="caption" color={colors.textMuted}>
-          Lv {entry.level} · {entry.missions} quests
+          רמה {entry.level} · {entry.missions} משימות
         </Text>
       </View>
       <View style={styles.points}>
@@ -49,7 +49,7 @@ export function LeaderboardRow({
           {compactNumber(entry.points)}
         </Text>
         <Text variant="caption" color={colors.textMuted}>
-          pts
+          נק׳
         </Text>
       </View>
     </Card>

@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
+import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -12,6 +13,10 @@ import { AuthGate } from '@/features/auth/AuthGate';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { queryClient } from '@/lib/queryClient';
 import { colors } from '@/theme';
+
+// Spontani is a Hebrew, right-to-left app — force RTL layout app-wide.
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 
 SplashScreen.preventAutoHideAsync();
 

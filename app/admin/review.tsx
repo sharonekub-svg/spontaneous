@@ -29,7 +29,7 @@ export default function ReviewQueueScreen() {
     try {
       await approve.mutateAsync(item.id);
     } catch (err) {
-      Alert.alert('Could not approve', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן לאשר', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -40,11 +40,11 @@ export default function ReviewQueueScreen() {
       return;
     }
     try {
-      await reject.mutateAsync({ id: item.id, reason: reason.trim() || 'Proof not accepted.' });
+      await reject.mutateAsync({ id: item.id, reason: reason.trim() || 'ההוכחה לא התקבלה.' });
       setRejectingId(null);
       setReason('');
     } catch (err) {
-      Alert.alert('Could not reject', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן לדחות', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -59,9 +59,9 @@ export default function ReviewQueueScreen() {
         />
       }
     >
-      <Text variant="title">Review Queue</Text>
+      <Text variant="title">תור בדיקה</Text>
       <Text variant="bodyMuted" color={colors.textSecondary} style={styles.subtitle}>
-        {queue.data?.length ?? 0} submissions waiting for review.
+        {queue.data?.length ?? 0} הגשות ממתינות לבדיקה.
       </Text>
 
       {queue.isLoading ? (
@@ -69,8 +69,8 @@ export default function ReviewQueueScreen() {
       ) : (queue.data?.length ?? 0) === 0 ? (
         <EmptyState
           icon="checkmark-done"
-          title="Queue is clear"
-          message="No pending submissions."
+          title="התור ריק"
+          message="אין הגשות ממתינות."
         />
       ) : (
         <View style={styles.list}>
@@ -84,7 +84,7 @@ export default function ReviewQueueScreen() {
                 />
                 <View style={styles.flex}>
                   <Text variant="subheading">
-                    {item.profile?.display_name || item.profile?.username || 'Player'}
+                    {item.profile?.display_name || item.profile?.username || 'שחקן'}
                   </Text>
                   <Text variant="caption" color={colors.textMuted}>
                     {relativeTime(item.created_at)}
@@ -93,7 +93,7 @@ export default function ReviewQueueScreen() {
                 {item.mission ? <DifficultyTag difficulty={item.mission.difficulty} /> : null}
               </View>
 
-              <Text variant="heading">{item.mission?.title ?? 'Mission'}</Text>
+              <Text variant="heading">{item.mission?.title ?? 'משימה'}</Text>
 
               {/* Proof */}
               {item.proof_type === 'photo' && item.signedProofUrl ? (
@@ -103,9 +103,9 @@ export default function ReviewQueueScreen() {
                   contentFit="cover"
                 />
               ) : item.proof_type === 'video' && item.signedProofUrl ? (
-                <Pill label="📹 Video proof attached" color={colors.primary} />
+                <Pill label="הוכחת וידאו מצורפת" color={colors.primary} />
               ) : item.proof_type === 'voice' && item.signedProofUrl ? (
-                <Pill label="🎙️ Voice proof attached" color={colors.primary} />
+                <Pill label="הוכחה קולית מצורפת" color={colors.primary} />
               ) : null}
               {item.proof_text ? (
                 <View style={styles.textProof}>
@@ -117,8 +117,8 @@ export default function ReviewQueueScreen() {
 
               {rejectingId === item.id ? (
                 <Input
-                  label="Rejection reason"
-                  placeholder="Why is this being rejected?"
+                  label="סיבת הדחייה"
+                  placeholder="למה זה נדחה?"
                   value={reason}
                   onChangeText={setReason}
                 />
@@ -127,7 +127,7 @@ export default function ReviewQueueScreen() {
               <View style={styles.actions}>
                 <View style={styles.flex}>
                   <Button
-                    label="Reject"
+                    label="דחייה"
                     variant="danger"
                     onPress={() => handleReject(item)}
                     loading={reject.isPending && rejectingId === item.id}
@@ -136,7 +136,7 @@ export default function ReviewQueueScreen() {
                 </View>
                 <View style={styles.flex}>
                   <Button
-                    label="Approve"
+                    label="אישור"
                     onPress={() => handleApprove(item)}
                     loading={approve.isPending}
                     fullWidth

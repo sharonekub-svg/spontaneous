@@ -7,5 +7,5 @@ import { Pill } from './Pill';
 
 export function DifficultyTag({ difficulty }: { difficulty: Difficulty }) {
   const meta = difficultyMeta[difficulty];
-  return <Pill label={`${meta.emoji} ${meta.label}`} color={colors.difficulty[difficulty]} />;
+  return <Pill label={meta.label} color={colors.difficulty[difficulty]} />;
 }

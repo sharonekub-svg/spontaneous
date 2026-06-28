@@ -16,20 +16,20 @@ export default function SignupScreen() {
   async function handleSignup() {
     const cleanUsername = username.trim().toLowerCase();
     if (cleanUsername.length < 3) {
-      Alert.alert('Pick a username', 'Usernames need at least 3 characters.');
+      Alert.alert('בחרו שם משתמש', 'שם משתמש צריך לפחות 3 תווים.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Weak password', 'Use at least 6 characters.');
+      Alert.alert('סיסמה חלשה', 'השתמשו בלפחות 6 תווים.');
       return;
     }
     setLoading(true);
     try {
       await signUpWithEmail({ email: email.trim(), password, username: cleanUsername });
-      Alert.alert('You’re in! 🎉', 'Your account is ready. Let’s find your first quest.');
+      Alert.alert('נכנסת!', 'החשבון מוכן. בואו נמצא את המשימה הראשונה.');
       router.replace('/(tabs)');
     } catch (err) {
-      Alert.alert('Sign-up failed', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('ההרשמה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }
@@ -39,24 +39,24 @@ export default function SignupScreen() {
     <Screen scroll gradient>
       <View style={styles.hero}>
         <Text variant="overline" color={colors.primary}>
-          Join Spontani
+          הצטרפו לספונטני
         </Text>
-        <Text variant="display">Start your streak.</Text>
+        <Text variant="display">התחילו את הרצף.</Text>
         <Text variant="bodyMuted" color={colors.textSecondary}>
-          Daily side quests, real-life XP, friendly competition.
+          משימות יומיות, XP מהחיים האמיתיים, תחרות חברית.
         </Text>
       </View>
 
       <View style={styles.form}>
         <Input
-          label="Username"
+          label="שם משתמש"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
           placeholder="quest_master"
         />
         <Input
-          label="Email"
+          label="אימייל"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -64,14 +64,14 @@ export default function SignupScreen() {
           placeholder="you@example.com"
         />
         <Input
-          label="Password"
+          label="סיסמה"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          placeholder="At least 6 characters"
+          placeholder="לפחות 6 תווים"
         />
         <Button
-          label="Create account"
+          label="צרו חשבון"
           onPress={handleSignup}
           loading={loading}
           fullWidth
@@ -81,11 +81,11 @@ export default function SignupScreen() {
 
       <View style={styles.footer}>
         <Text variant="bodyMuted" color={colors.textMuted}>
-          Already have an account?{' '}
+          כבר יש לכם חשבון?{' '}
         </Text>
         <Link href="/login">
           <Text variant="body" color={colors.primary}>
-            Log in
+            התחברות
           </Text>
         </Link>
       </View>

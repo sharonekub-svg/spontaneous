@@ -27,7 +27,7 @@ export default function GroupsScreen() {
       await createGroup.mutateAsync({ name: groupName.trim(), description: '' });
       setGroupName('');
     } catch (err) {
-      Alert.alert('Could not create group', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן ליצור קבוצה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -36,9 +36,9 @@ export default function GroupsScreen() {
     try {
       await joinGroup.mutateAsync(inviteCode.trim());
       setInviteCode('');
-      Alert.alert('Joined!', 'Welcome to the group.');
+      Alert.alert('הצטרפת!', 'ברוכים הבאים לקבוצה.');
     } catch (err) {
-      Alert.alert('Could not join', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן להצטרף', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -47,24 +47,24 @@ export default function GroupsScreen() {
     try {
       await sendRequest.mutateAsync(friendName.trim());
       setFriendName('');
-      Alert.alert('Request sent', 'They’ll show up once they accept.');
+      Alert.alert('הבקשה נשלחה', 'הם יופיעו ברגע שיאשרו.');
     } catch (err) {
-      Alert.alert('Could not send', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
   return (
     <Screen scroll>
-      <Text variant="title">Groups & Friends</Text>
+      <Text variant="title">קבוצות וחברים</Text>
       <Text variant="bodyMuted" color={colors.textSecondary} style={styles.subtitle}>
-        Compete in private leaderboards with the people you know.
+        התחרו בטבלאות פרטיות עם אנשים שאתם מכירים.
       </Text>
 
       {/* Friend requests */}
       {(friends.data?.incoming.length ?? 0) > 0 ? (
         <View style={styles.section}>
           <Text variant="overline" color={colors.primary}>
-            Friend requests
+            בקשות חברות
           </Text>
           {friends.data?.incoming.map((req) => (
             <Card key={req.friendship.id} style={styles.requestRow} padded>
@@ -92,33 +92,33 @@ export default function GroupsScreen() {
       {/* Add friend */}
       <View style={styles.section}>
         <Text variant="overline" color={colors.textMuted}>
-          Add a friend
+          הוספת חבר
         </Text>
         <View style={styles.inlineForm}>
           <View style={styles.flex}>
             <Input
-              placeholder="Their username"
+              placeholder="שם המשתמש שלהם"
               value={friendName}
               onChangeText={setFriendName}
               autoCapitalize="none"
             />
           </View>
-          <Button label="Add" onPress={handleAddFriend} loading={sendRequest.isPending} />
+          <Button label="הוספה" onPress={handleAddFriend} loading={sendRequest.isPending} />
         </View>
       </View>
 
       {/* My groups */}
       <View style={styles.section}>
         <Text variant="overline" color={colors.textMuted}>
-          My groups
+          הקבוצות שלי
         </Text>
         {groups.isLoading ? (
           <LoadingState />
         ) : (groups.data?.length ?? 0) === 0 ? (
           <EmptyState
             icon="people"
-            title="No groups yet"
-            message="Create one below or join with an invite code."
+            title="אין עדיין קבוצות"
+            message="צרו אחת למטה או הצטרפו עם קוד הזמנה."
           />
         ) : (
           groups.data?.map((group) => (
@@ -133,7 +133,7 @@ export default function GroupsScreen() {
               <View style={styles.flex}>
                 <Text variant="subheading">{group.name}</Text>
                 <Text variant="caption" color={colors.textMuted}>
-                  {group.memberCount} members · code {group.invite_code}
+                  {group.memberCount} חברים · קוד {group.invite_code}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
@@ -145,17 +145,17 @@ export default function GroupsScreen() {
       {/* Create / join */}
       <View style={styles.section}>
         <Text variant="overline" color={colors.textMuted}>
-          Create a group
+          יצירת קבוצה
         </Text>
         <View style={styles.inlineForm}>
           <View style={styles.flex}>
-            <Input placeholder="Group name" value={groupName} onChangeText={setGroupName} />
+            <Input placeholder="שם הקבוצה" value={groupName} onChangeText={setGroupName} />
           </View>
-          <Button label="Create" onPress={handleCreate} loading={createGroup.isPending} />
+          <Button label="יצירה" onPress={handleCreate} loading={createGroup.isPending} />
         </View>
 
         <Text variant="overline" color={colors.textMuted} style={styles.joinLabel}>
-          Join with a code
+          הצטרפות עם קוד
         </Text>
         <View style={styles.inlineForm}>
           <View style={styles.flex}>
@@ -167,7 +167,7 @@ export default function GroupsScreen() {
             />
           </View>
           <Button
-            label="Join"
+            label="הצטרפות"
             variant="secondary"
             onPress={handleJoin}
             loading={joinGroup.isPending}

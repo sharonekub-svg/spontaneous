@@ -13,31 +13,31 @@ export default function AdminOverviewScreen() {
 
   const metrics = [
     {
-      label: 'Total users',
+      label: 'סך המשתמשים',
       value: analytics.data?.totalUsers,
       icon: 'people' as const,
       color: colors.primary,
     },
     {
-      label: 'Pending reviews',
+      label: 'ממתינות לבדיקה',
       value: analytics.data?.pendingReviews,
       icon: 'hourglass' as const,
       color: colors.warning,
     },
     {
-      label: 'Approved today',
+      label: 'אושרו היום',
       value: analytics.data?.approvedToday,
       icon: 'checkmark-circle' as const,
       color: colors.success,
     },
     {
-      label: 'Active missions',
+      label: 'משימות פעילות',
       value: analytics.data?.totalMissions,
       icon: 'flag' as const,
       color: colors.primary,
     },
     {
-      label: 'Open reports',
+      label: 'דיווחים פתוחים',
       value: analytics.data?.openReports,
       icon: 'alert-circle' as const,
       color: colors.danger,
@@ -55,9 +55,9 @@ export default function AdminOverviewScreen() {
         />
       }
     >
-      <Text variant="title">Admin</Text>
+      <Text variant="title">ניהול</Text>
       <Text variant="bodyMuted" color={colors.textSecondary} style={styles.subtitle}>
-        Moderation, content, and community at a glance.
+        ניהול, תוכן וקהילה במבט אחד.
       </Text>
 
       {analytics.isLoading ? (
@@ -82,19 +82,19 @@ export default function AdminOverviewScreen() {
 
       <View style={styles.actions}>
         <Button
-          label="Go to review queue"
+          label="מעבר לתור הבדיקה"
           onPress={() => router.push('/admin/review')}
           fullWidth
           icon={<Ionicons name="checkmark-done" size={18} color={colors.textPrimary} />}
         />
         <Button
-          label="Manage missions"
+          label="ניהול משימות"
           variant="secondary"
           onPress={() => router.push('/admin/missions')}
           fullWidth
         />
         <Button
-          label="Back to app"
+          label="חזרה לאפליקציה"
           variant="ghost"
           onPress={() => router.replace('/(tabs)')}
           fullWidth

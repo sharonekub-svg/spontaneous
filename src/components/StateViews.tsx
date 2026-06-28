@@ -6,7 +6,7 @@ import { colors, spacing } from '@/theme';
 import { Button } from './Button';
 import { Text } from './Text';
 
-export function LoadingState({ label = 'Loading…' }: { label?: string }) {
+export function LoadingState({ label = 'טוען…' }: { label?: string }) {
   return (
     <View style={styles.center}>
       <ActivityIndicator color={colors.primary} size="large" />
@@ -57,7 +57,7 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-export function ErrorState({ message = 'Something went wrong.', onRetry }: ErrorStateProps) {
+export function ErrorState({ message = 'משהו השתבש.', onRetry }: ErrorStateProps) {
   return (
     <View style={styles.center}>
       <View style={[styles.iconCircle, { backgroundColor: `${colors.danger}22` }]}>
@@ -66,7 +66,7 @@ export function ErrorState({ message = 'Something went wrong.', onRetry }: Error
       <Text variant="subheading" center>
         {message}
       </Text>
-      {onRetry ? <Button label="Try again" onPress={onRetry} variant="secondary" /> : null}
+      {onRetry ? <Button label="נסו שוב" onPress={onRetry} variant="secondary" /> : null}
     </View>
   );
 }

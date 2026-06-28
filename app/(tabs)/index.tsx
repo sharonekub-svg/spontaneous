@@ -20,6 +20,7 @@ import { MoodSelector } from '@/features/missions/components/MoodSelector';
 import { useNotifications } from '@/features/notifications/hooks';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
 import { colors, spacing } from '@/theme';
+import { pointsForMood } from '@/lib/points';
 import type { Mood } from '@/types/database.types';
 
 export default function HomeScreen() {
@@ -35,7 +36,7 @@ export default function HomeScreen() {
     try {
       await checkIn.mutateAsync(mood);
     } catch (err) {
-      Alert.alert('Could not load a quest', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('לא הצלחנו לטעון משימה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -115,7 +116,7 @@ function ActiveMission({
 }) {
   const mission = state.mission;
   const submission = state.submission;
-  if (!mission) return <EmptyState title="No quest yet" message="Pull to refresh to try again." />;
+  if (!mission) return <EmptyState title="אין עדיין משימה" message="משכו לרענון ונסו שוב." />;
 
   const approved = submission?.status === 'approved';
   const pending = submission?.status === 'pending';
@@ -125,7 +126,7 @@ function ActiveMission({
     <View style={styles.missionWrap}>
       {approved ? <Confetti /> : null}
       <Text variant="overline" color={colors.primary}>
-        Today’s side quest
+        המשימה היומית שלך
       </Text>
 
       <Card elevated style={styles.missionCard}>
@@ -144,7 +145,7 @@ function ActiveMission({
 
         <View style={styles.rewardRow}>
           <Pill
-            label={`+${mission.base_points} points`}
+            label={`+${pointsForMood(state.checkinMood)} נקודות`}
             color={colors.reward}
             icon={<Ionicons name="cash" size={13} color={colors.reward} />}
           />
@@ -159,14 +160,14 @@ function ActiveMission({
           <View style={[styles.statusBox, { backgroundColor: `${colors.success}1A` }]}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text variant="subheading" color={colors.success}>
-              Approved! Rewards added. 🎉
+              אושר! הפרסים נוספו.
             </Text>
           </View>
         ) : pending ? (
           <View style={[styles.statusBox, { backgroundColor: `${colors.warning}1A` }]}>
             <Ionicons name="hourglass" size={20} color={colors.warning} />
             <Text variant="bodyMuted" color={colors.warning}>
-              Proof submitted — waiting for admin review.
+              ההוכחה נשלחה — ממתינה לבדיקת מנהל.
             </Text>
           </View>
         ) : rejected ? (
@@ -174,13 +175,13 @@ function ActiveMission({
             <View style={[styles.statusBox, { backgroundColor: `${colors.danger}1A` }]}>
               <Ionicons name="close-circle" size={20} color={colors.danger} />
               <Text variant="bodyMuted" color={colors.danger}>
-                {submission?.review_reason || 'Not accepted. Give it another try!'}
+                {submission?.review_reason || 'לא אושר. נסו שוב!'}
               </Text>
             </View>
-            <Button label="Resubmit proof" onPress={onOpen} fullWidth />
+            <Button label="שליחת הוכחה מחדש" onPress={onOpen} fullWidth />
           </View>
         ) : (
-          <Button label="Complete this quest" onPress={onOpen} fullWidth size="lg" />
+          <Button label="השלימו את המשימה" onPress={onOpen} fullWidth size="lg" />
         )}
       </Card>
     </View>
@@ -189,9 +190,9 @@ function ActiveMission({
 
 function getGreeting(): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 12) return 'בוקר טוב';
+  if (h < 18) return 'צהריים טובים';
+  return 'ערב טוב';
 }
 
 const styles = StyleSheet.create({

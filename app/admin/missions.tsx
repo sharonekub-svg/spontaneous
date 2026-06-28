@@ -28,10 +28,10 @@ const DIFFICULTY_DEFAULTS: Record<Difficulty, { points: number; xp: number }> = 
 };
 
 const difficultySegments: Segment<Difficulty>[] = [
-  { value: 'easy', label: 'Easy' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'hard', label: 'Hard' },
-  { value: 'extreme', label: 'Extreme' },
+  { value: 'easy', label: 'קל' },
+  { value: 'medium', label: 'בינוני' },
+  { value: 'hard', label: 'קשה' },
+  { value: 'extreme', label: 'קיצוני' },
 ];
 
 export default function AdminMissionsScreen() {
@@ -52,25 +52,25 @@ export default function AdminMissionsScreen() {
   }
 
   async function handleDelete(mission: MissionRow) {
-    Alert.alert('Deactivate mission?', `"${mission.title}" will no longer be assigned.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Deactivate', style: 'destructive', onPress: () => remove.mutate(mission.id) },
+    Alert.alert('להשבית משימה?', `"${mission.title}" לא תוקצה יותר.`, [
+      { text: 'ביטול', style: 'cancel' },
+      { text: 'השבתה', style: 'destructive', onPress: () => remove.mutate(mission.id) },
     ]);
   }
 
   return (
     <Screen scroll>
       <View style={styles.head}>
-        <Text variant="title">Missions</Text>
+        <Text variant="title">משימות</Text>
         <Button
-          label="New"
+          label="חדשה"
           onPress={openCreate}
           size="sm"
           icon={<Ionicons name="add" size={16} color={colors.textPrimary} />}
         />
       </View>
       <Text variant="bodyMuted" color={colors.textSecondary} style={styles.subtitle}>
-        {missions.data?.length ?? 0} active missions.
+        {missions.data?.length ?? 0} משימות פעילות.
       </Text>
 
       {missions.isLoading ? (
@@ -85,7 +85,7 @@ export default function AdminMissionsScreen() {
                 </Text>
                 <View style={styles.metaRow}>
                   <DifficultyTag difficulty={m.difficulty} />
-                  {m.is_featured ? <Pill label="Featured" color={colors.reward} /> : null}
+                  {m.is_featured ? <Pill label="מומלצת" color={colors.reward} /> : null}
                 </View>
               </View>
               <Pressable onPress={() => openEdit(m)} style={styles.iconBtn}>
@@ -111,7 +111,7 @@ export default function AdminMissionsScreen() {
               else await create.mutateAsync(input);
               setEditorOpen(false);
             } catch (err) {
-              Alert.alert('Save failed', err instanceof Error ? err.message : 'Try again.');
+              Alert.alert('השמירה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
             }
           }}
         />
@@ -153,7 +153,7 @@ function MissionEditor({
 
   function save() {
     if (title.trim().length < 3) {
-      Alert.alert('Add a title', 'Missions need a descriptive title.');
+      Alert.alert('הוסיפו כותרת', 'משימות צריכות כותרת תיאורית.');
       return;
     }
     onSave({
@@ -178,24 +178,24 @@ function MissionEditor({
   return (
     <View style={styles.editor}>
       <View style={styles.editorHead}>
-        <Text variant="heading">{mission ? 'Edit mission' : 'New mission'}</Text>
+        <Text variant="heading">{mission ? 'עריכת משימה' : 'משימה חדשה'}</Text>
         <Pressable onPress={onClose}>
           <Ionicons name="close" size={26} color={colors.textPrimary} />
         </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.editorBody} showsVerticalScrollIndicator={false}>
-        <Input label="Title" value={title} onChangeText={setTitle} placeholder="Mission title" />
+        <Input label="כותרת" value={title} onChangeText={setTitle} placeholder="כותרת המשימה" />
         <Input
-          label="Description"
+          label="תיאור"
           value={description}
           onChangeText={setDescription}
-          placeholder="What should the player do?"
+          placeholder="מה השחקן צריך לעשות?"
           multiline
           numberOfLines={3}
           style={styles.textArea}
         />
         <Text variant="caption" color={colors.textSecondary}>
-          Difficulty
+          רמת קושי
         </Text>
         <SegmentedControl
           segments={difficultySegments}
@@ -206,7 +206,7 @@ function MissionEditor({
         {categories.length ? (
           <>
             <Text variant="caption" color={colors.textSecondary}>
-              Category
+              קטגוריה
             </Text>
             <SegmentedControl
               segments={categories}
@@ -219,7 +219,7 @@ function MissionEditor({
         <View style={styles.numRow}>
           <View style={styles.flex}>
             <Input
-              label="Points"
+              label="נקודות"
               value={points}
               onChangeText={setPoints}
               keyboardType="number-pad"
@@ -235,10 +235,10 @@ function MissionEditor({
             size={22}
             color={featured ? colors.primary : colors.textMuted}
           />
-          <Text variant="body">Feature on home screen</Text>
+          <Text variant="body">הצגה במסך הבית</Text>
         </Pressable>
         <Button
-          label={mission ? 'Save changes' : 'Create mission'}
+          label={mission ? 'שמירת שינויים' : 'יצירת משימה'}
           onPress={save}
           loading={saving}
           fullWidth

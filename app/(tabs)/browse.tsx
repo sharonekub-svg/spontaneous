@@ -24,7 +24,7 @@ export default function BrowseScreen() {
 
   const segments: Segment<string>[] = useMemo(
     () => [
-      { value: 'all', label: 'All' },
+      { value: 'all', label: 'הכול' },
       ...(categories.data ?? []).map((c) => ({ value: c.id, label: c.name })),
     ],
     [categories.data],
@@ -33,9 +33,9 @@ export default function BrowseScreen() {
   return (
     <Screen padded={false}>
       <View style={styles.header}>
-        <Text variant="title">Quest Library</Text>
+        <Text variant="title">ספריית המשימות</Text>
         <Text variant="bodyMuted" color={colors.textSecondary}>
-          Hundreds of side quests across every category.
+          מאות משימות בכל קטגוריה.
         </Text>
       </View>
 
@@ -53,7 +53,7 @@ export default function BrowseScreen() {
       ) : missions.isError ? (
         <ErrorState onRetry={() => missions.refetch()} />
       ) : (missions.data?.length ?? 0) === 0 ? (
-        <EmptyState icon="compass" title="No quests here yet" message="Try another category." />
+        <EmptyState icon="compass" title="אין כאן משימות עדיין" message="נסו קטגוריה אחרת." />
       ) : (
         <FlashList
           data={missions.data}

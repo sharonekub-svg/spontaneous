@@ -18,6 +18,7 @@ import { ProofComposer, type ProofPayload } from '@/features/missions/components
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
+import { pointsForMood } from '@/lib/points';
 import type { MissionWithCategory } from '@/features/missions/api';
 import { colors, spacing } from '@/theme';
 
@@ -51,7 +52,7 @@ export default function MissionDetailScreen() {
   if (missionQuery.isError || !missionQuery.data) {
     return (
       <Screen>
-        <ErrorState message="Could not load this quest." onRetry={() => missionQuery.refetch()} />
+        <ErrorState message="לא ניתן לטעון את המשימה." onRetry={() => missionQuery.refetch()} />
       </Screen>
     );
   }
@@ -76,7 +77,7 @@ export default function MissionDetailScreen() {
       });
       setJustSubmitted(true);
     } catch (err) {
-      Alert.alert('Submission failed', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('השליחה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -86,7 +87,7 @@ export default function MissionDetailScreen() {
     <Screen scroll gradient>
       <Pressable onPress={() => router.back()} style={styles.back}>
         <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-        <Text variant="body">Back</Text>
+        <Text variant="body">חזרה</Text>
       </Pressable>
 
       <Card elevated style={styles.card}>
@@ -104,7 +105,7 @@ export default function MissionDetailScreen() {
         </Text>
         <View style={styles.rewardRow}>
           <Pill
-            label={`+${mission.base_points} points`}
+            label={`+${pointsForMood(state?.checkinMood)} נקודות`}
             color={colors.reward}
             icon={<Ionicons name="cash" size={13} color={colors.reward} />}
           />
@@ -122,10 +123,10 @@ export default function MissionDetailScreen() {
             <Confetti count={18} />
             <Ionicons name="hourglass" size={36} color={colors.warning} />
             <Text variant="heading" center>
-              Proof submitted!
+              ההוכחה נשלחה!
             </Text>
             <Text variant="bodyMuted" color={colors.textSecondary} center>
-              An admin will review it shortly. You’ll get a notification the moment it’s approved.
+              מנהל יבדוק אותה בקרוב. תקבלו התראה ברגע שהיא תאושר.
             </Text>
           </Card>
         ) : canSubmit ? (
@@ -139,20 +140,20 @@ export default function MissionDetailScreen() {
             <Confetti />
             <Ionicons name="checkmark-circle" size={36} color={colors.success} />
             <Text variant="heading" center>
-              Quest complete!
+              המשימה הושלמה!
             </Text>
             <Text variant="bodyMuted" color={colors.textSecondary} center>
-              You earned {submission.points_awarded} points and {submission.xp_awarded} XP.
+              הרווחת {submission.points_awarded} נקודות ו-{submission.xp_awarded} XP.
             </Text>
           </Card>
         ) : (
           <Card style={styles.statusCard}>
             <Ionicons name="lock-closed" size={32} color={colors.textMuted} />
             <Text variant="subheading" center>
-              This is part of the quest library
+              זו משימה מספריית המשימות
             </Text>
             <Text variant="bodyMuted" color={colors.textMuted} center>
-              Check in on the Today tab to get your daily quest and earn rewards.
+              עשו צ׳ק-אין בלשונית «היום» כדי לקבל את המשימה היומית ולצבור פרסים.
             </Text>
           </Card>
         )}

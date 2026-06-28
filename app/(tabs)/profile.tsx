@@ -40,7 +40,7 @@ export default function ProfileScreen() {
       try {
         await uploadAvatar.mutateAsync(result.assets[0].uri);
       } catch (err) {
-        Alert.alert('Upload failed', err instanceof Error ? err.message : 'Try again.');
+        Alert.alert('ההעלאה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
       }
     }
   }
@@ -72,7 +72,7 @@ export default function ProfileScreen() {
         </Text>
         {profile.longest_streak > 0 ? (
           <Pill
-            label={`Best streak: ${profile.longest_streak} days`}
+            label={`הרצף הטוב ביותר: ${profile.longest_streak} ימים`}
             color={colors.warning}
             icon={<Ionicons name="flame" size={13} color={colors.warning} />}
           />
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
       </Card>
 
       {/* Badges */}
-      <Section title="Badges" trailing={`${earnedIds.size}/${badges.data?.length ?? 0}`}>
+      <Section title="תגים" trailing={`${earnedIds.size}/${badges.data?.length ?? 0}`}>
         {badges.isLoading ? (
           <LoadingState />
         ) : (
@@ -93,12 +93,12 @@ export default function ProfileScreen() {
       </Section>
 
       {/* Stats */}
-      <Section title="Stats">
+      <Section title="סטטיסטיקות">
         <View style={styles.statsGrid}>
-          <StatBox label="Approved quests" value={stats.data?.totalApproved ?? 0} />
-          <StatBox label="Categories" value={stats.data?.byCategory.length ?? 0} />
+          <StatBox label="משימות שאושרו" value={stats.data?.totalApproved ?? 0} />
+          <StatBox label="קטגוריות" value={stats.data?.byCategory.length ?? 0} />
           <StatBox
-            label="Hardest cleared"
+            label="הקושי הגבוה ביותר"
             value={
               stats.data?.byDifficulty.length
                 ? (difficultyMeta[
@@ -113,10 +113,10 @@ export default function ProfileScreen() {
       </Section>
 
       {/* History */}
-      <Section title="Recent activity">
+      <Section title="פעילות אחרונה">
         {(history.data?.length ?? 0) === 0 ? (
           <Text variant="bodyMuted" color={colors.textMuted}>
-            No quests completed yet — your first one is waiting on the Today tab.
+            עדיין לא הושלמו משימות — הראשונה מחכה בלשונית «היום».
           </Text>
         ) : (
           history.data?.slice(0, 8).map((item) => (
@@ -139,7 +139,7 @@ export default function ProfileScreen() {
                 }
               />
               <Text variant="bodyMuted" style={styles.flex} numberOfLines={1}>
-                {item.mission?.title ?? 'Quest'}
+                {item.mission?.title ?? 'משימה'}
               </Text>
               <Text variant="caption" color={colors.textMuted}>
                 {relativeTime(item.created_at)}
@@ -152,14 +152,14 @@ export default function ProfileScreen() {
       <View style={styles.actions}>
         {isAdmin ? (
           <Button
-            label="Admin dashboard"
+            label="לוח ניהול"
             variant="secondary"
             fullWidth
             onPress={() => router.push('/admin')}
             icon={<Ionicons name="shield-checkmark" size={18} color={colors.textPrimary} />}
           />
         ) : null}
-        <Button label="Log out" variant="ghost" fullWidth onPress={signOut} />
+        <Button label="התנתקות" variant="ghost" fullWidth onPress={signOut} />
       </View>
     </Screen>
   );

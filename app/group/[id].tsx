@@ -25,14 +25,14 @@ export default function GroupDetailScreen() {
   async function copyCode() {
     if (!group) return;
     await Clipboard.setStringAsync(group.invite_code);
-    Alert.alert('Copied!', `Invite code ${group.invite_code} copied to clipboard.`);
+    Alert.alert('הועתק!', `קוד ההזמנה ${group.invite_code} הועתק.`);
   }
 
   async function handleLeave() {
-    Alert.alert('Leave group?', 'You can rejoin later with the invite code.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('לעזוב את הקבוצה?', 'תוכלו להצטרף שוב מאוחר יותר עם קוד ההזמנה.', [
+      { text: 'ביטול', style: 'cancel' },
       {
-        text: 'Leave',
+        text: 'עזיבה',
         style: 'destructive',
         onPress: async () => {
           await leaveGroup.mutateAsync(id as string);
@@ -53,7 +53,7 @@ export default function GroupDetailScreen() {
     <Screen scroll>
       <Pressable onPress={() => router.back()} style={styles.back}>
         <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-        <Text variant="body">Back</Text>
+        <Text variant="body">חזרה</Text>
       </Pressable>
 
       <View style={styles.head}>
@@ -62,14 +62,14 @@ export default function GroupDetailScreen() {
         </View>
         <Text variant="title">{group.name}</Text>
         <Text variant="bodyMuted" color={colors.textMuted}>
-          {members.data?.length ?? group.memberCount} members
+          {members.data?.length ?? group.memberCount} חברים
         </Text>
       </View>
 
       <Card style={styles.codeCard} onPress={copyCode}>
         <View>
           <Text variant="caption" color={colors.textMuted}>
-            Invite code
+            קוד הזמנה
           </Text>
           <Text variant="heading">{group.invite_code}</Text>
         </View>
@@ -77,7 +77,7 @@ export default function GroupDetailScreen() {
       </Card>
 
       <View style={styles.section}>
-        <Text variant="heading">Leaderboard</Text>
+        <Text variant="heading">טבלת מובילים</Text>
         {leaderboard.isLoading ? (
           <LoadingState />
         ) : (
@@ -93,7 +93,7 @@ export default function GroupDetailScreen() {
       </View>
 
       <Button
-        label="Leave group"
+        label="עזיבת הקבוצה"
         variant="ghost"
         onPress={handleLeave}
         style={styles.leave}

@@ -16,9 +16,9 @@ interface MoodSelectorProps {
 export function MoodSelector({ onSelect, loading, selected }: MoodSelectorProps) {
   return (
     <View style={styles.wrap}>
-      <Text variant="title">How spontaneous are you feeling today?</Text>
+      <Text variant="title">כמה ספונטניים אתם מרגישים היום?</Text>
       <Text variant="bodyMuted" color={colors.textSecondary}>
-        Your answer sets the difficulty of today’s side quest.
+        התשובה שלכם קובעת את רמת הקושי והניקוד של המשימה היומית.
       </Text>
       <View style={styles.options}>
         {moodOrder.map((mood) => {

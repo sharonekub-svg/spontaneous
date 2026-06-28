@@ -20,7 +20,7 @@ export default function LoginScreen() {
 
   async function handleEmailLogin() {
     if (!email || !password) {
-      Alert.alert('Missing details', 'Enter your email and password.');
+      Alert.alert('חסרים פרטים', 'הזינו אימייל וסיסמה.');
       return;
     }
     setLoading(true);
@@ -28,7 +28,7 @@ export default function LoginScreen() {
       await signInWithEmail(email.trim(), password);
       router.replace('/(tabs)');
     } catch (err) {
-      Alert.alert('Login failed', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function LoginScreen() {
       if (provider === 'google') await signInWithGoogle();
       else await signInWithApple();
     } catch (err) {
-      Alert.alert('Sign-in failed', err instanceof Error ? err.message : 'Try again.');
+      Alert.alert('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -47,17 +47,17 @@ export default function LoginScreen() {
     <Screen scroll gradient>
       <View style={styles.hero}>
         <Text variant="overline" color={colors.primary}>
-          Spontani
+          ספונטני
         </Text>
-        <Text variant="display">Welcome back.</Text>
+        <Text variant="display">טוב שחזרת.</Text>
         <Text variant="bodyMuted" color={colors.textSecondary}>
-          Your next side quest is waiting.
+          המשימה הבאה שלך מחכה.
         </Text>
       </View>
 
       <View style={styles.form}>
         <Input
-          label="Email"
+          label="אימייל"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -65,7 +65,7 @@ export default function LoginScreen() {
           placeholder="you@example.com"
         />
         <Input
-          label="Password"
+          label="סיסמה"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -73,22 +73,22 @@ export default function LoginScreen() {
         />
         <Link href="/forgot-password" style={styles.forgot}>
           <Text variant="caption" color={colors.primary}>
-            Forgot password?
+            שכחתם סיסמה?
           </Text>
         </Link>
 
-        <Button label="Log in" onPress={handleEmailLogin} loading={loading} fullWidth size="lg" />
+        <Button label="התחברות" onPress={handleEmailLogin} loading={loading} fullWidth size="lg" />
 
         <View style={styles.divider}>
           <View style={styles.line} />
           <Text variant="caption" color={colors.textMuted}>
-            OR
+            או
           </Text>
           <View style={styles.line} />
         </View>
 
         <Button
-          label="Continue with Google"
+          label="המשיכו עם גוגל"
           variant="secondary"
           fullWidth
           onPress={() => handleOAuth('google')}
@@ -96,7 +96,7 @@ export default function LoginScreen() {
         />
         {isAppleAuthAvailable() ? (
           <Button
-            label="Continue with Apple"
+            label="המשיכו עם אפל"
             variant="secondary"
             fullWidth
             onPress={() => handleOAuth('apple')}
@@ -107,11 +107,11 @@ export default function LoginScreen() {
 
       <View style={styles.footer}>
         <Text variant="bodyMuted" color={colors.textMuted}>
-          New here?{' '}
+          חדשים כאן?{' '}
         </Text>
         <Link href="/signup">
           <Text variant="body" color={colors.primary}>
-            Create an account
+            צרו חשבון
           </Text>
         </Link>
       </View>
