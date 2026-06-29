@@ -39,6 +39,19 @@ export async function sendPasswordReset(email: string) {
  */
 export async function signInWithGoogle() {
   const redirectTo = makeRedirectUri({ path: 'auth-callback' });
+
+  // On web we do a full-page redirect to Google and let Supabase resolve the
+  // `?code` on the /auth-callback route (detectSessionInUrl). The native popup
+  // flow below would not reliably capture the redirect in a browser.
+  if (Platform.OS === 'web') {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
+    if (error) throw error;
+    return;
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo, skipBrowserRedirect: true },

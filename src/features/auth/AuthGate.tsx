@@ -28,7 +28,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const inAuthGroup =
     pathname.startsWith('/login') ||
     pathname.startsWith('/signup') ||
-    pathname.startsWith('/forgot-password');
+    pathname.startsWith('/forgot-password') ||
+    // OAuth redirect target: stay here while the session is being resolved,
+    // then fall through to the app once authenticated.
+    pathname.startsWith('/auth-callback');
   const inAdminGroup = pathname.startsWith('/admin');
 
   if (!session && !inAuthGroup) {
