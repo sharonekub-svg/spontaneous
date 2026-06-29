@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button, Input, Screen, Text } from '@/components';
 import {
@@ -106,14 +106,14 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text variant="bodyMuted" color={colors.textMuted}>
-          חדשים כאן?{' '}
+        <Text variant="body" color={colors.textMuted}>
+          חדשים כאן?
         </Text>
-        <Link href="/signup">
+        <Pressable onPress={() => router.push('/signup')} hitSlop={10} style={styles.footerLink}>
           <Text variant="body" color={colors.primary}>
             צרו חשבון
           </Text>
-        </Link>
+        </Pressable>
       </View>
     </Screen>
   );
@@ -130,5 +130,12 @@ const styles = StyleSheet.create({
     marginVertical: spacing.sm,
   },
   line: { flex: 1, height: 1, backgroundColor: colors.border },
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xl },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xl,
+  },
+  footerLink: { paddingVertical: spacing.xs, paddingHorizontal: spacing.xs },
 });

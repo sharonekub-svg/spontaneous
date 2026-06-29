@@ -1,6 +1,6 @@
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button, Input, Screen, Text } from '@/components';
 import { signUpWithEmail } from '@/features/auth/api';
@@ -74,14 +74,14 @@ export default function SignupScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text variant="bodyMuted" color={colors.textMuted}>
-          כבר יש לכם חשבון?{' '}
+        <Text variant="body" color={colors.textMuted}>
+          כבר יש לכם חשבון?
         </Text>
-        <Link href="/login">
+        <Pressable onPress={() => router.push('/login')} hitSlop={10} style={styles.footerLink}>
           <Text variant="body" color={colors.primary}>
             התחברות
           </Text>
-        </Link>
+        </Pressable>
       </View>
     </Screen>
   );
@@ -90,5 +90,12 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   hero: { gap: spacing.xs, marginTop: spacing.xxl, marginBottom: spacing.xl },
   form: { gap: spacing.md },
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xl },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xl,
+  },
+  footerLink: { paddingVertical: spacing.xs, paddingHorizontal: spacing.xs },
 });
