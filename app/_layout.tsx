@@ -49,6 +49,7 @@ function RootLayout() {
               >
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="(auth)" />
+                <Stack.Screen name="auth-callback" />
                 <Stack.Screen name="mission/[id]" options={{ presentation: 'card' }} />
                 <Stack.Screen
                   name="notifications"
