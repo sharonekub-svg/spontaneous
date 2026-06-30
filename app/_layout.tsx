@@ -9,7 +9,7 @@ import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ToastProvider } from '@/components';
+import { ErrorBoundary, ToastProvider } from '@/components';
 import { AuthGate } from '@/features/auth/AuthGate';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
@@ -37,7 +37,8 @@ function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
-        <ToastProvider>
+        <ErrorBoundary>
+          <ToastProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <StatusBar style="light" />
@@ -66,6 +67,7 @@ function RootLayout() {
             </AuthProvider>
           </QueryClientProvider>
         </ToastProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
