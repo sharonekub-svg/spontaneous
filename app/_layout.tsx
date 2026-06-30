@@ -9,6 +9,7 @@ import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ToastProvider } from '@/components';
 import { AuthGate } from '@/features/auth/AuthGate';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
@@ -36,9 +37,10 @@ function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <StatusBar style="light" />
+        <ToastProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <StatusBar style="light" />
             <AuthGate>
               <Stack
                 screenOptions={{
@@ -60,8 +62,9 @@ function RootLayout() {
                 <Stack.Screen name="admin" />
               </Stack>
             </AuthGate>
-          </AuthProvider>
-        </QueryClientProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </ToastProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

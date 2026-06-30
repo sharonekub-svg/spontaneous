@@ -1,28 +1,29 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Button, Input, Screen, Text } from '@/components';
+import { Button, Input, Screen, Text, useToast } from '@/components';
 import { sendPasswordReset } from '@/features/auth/api';
 import { colors, spacing } from '@/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleReset() {
     if (!email) {
-      Alert.alert('הזינו אימייל', 'אנחנו צריכים את האימייל כדי לשלוח קישור איפוס.');
+      toast.error('הזינו אימייל', 'אנחנו צריכים את האימייל כדי לשלוח קישור איפוס.');
       return;
     }
     setLoading(true);
     try {
       await sendPasswordReset(email.trim());
-      Alert.alert('בדקו את הדואר', 'אם האימייל קיים, קישור איפוס בדרך.');
+      toast.success('בדקו את הדואר', 'אם האימייל קיים, קישור איפוס בדרך.');
       router.back();
     } catch (err) {
-      Alert.alert('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }

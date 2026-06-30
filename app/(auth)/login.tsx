@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Button, Input, Screen, Text } from '@/components';
+import { Button, Input, Screen, Text, useToast } from '@/components';
 import {
   isAppleAuthAvailable,
   signInWithApple,
@@ -14,13 +14,14 @@ import { colors, spacing } from '@/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleEmailLogin() {
     if (!email || !password) {
-      Alert.alert('חסרים פרטים', 'הזינו אימייל וסיסמה.');
+      toast.error('חסרים פרטים', 'הזינו אימייל וסיסמה.');
       return;
     }
     setLoading(true);
@@ -28,7 +29,7 @@ export default function LoginScreen() {
       await signInWithEmail(email.trim(), password);
       router.replace('/(tabs)');
     } catch (err) {
-      Alert.alert('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }
@@ -39,7 +40,7 @@ export default function LoginScreen() {
       if (provider === 'google') await signInWithGoogle();
       else await signInWithApple();
     } catch (err) {
-      Alert.alert('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 

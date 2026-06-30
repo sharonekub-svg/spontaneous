@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   Pill,
   Screen,
   Text,
+  useToast,
 } from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCheckIn, useTodayState } from '@/features/missions/hooks';
@@ -26,6 +27,7 @@ import type { Mood } from '@/types/database.types';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const toast = useToast();
   const { profile, refreshProfile } = useAuth();
   const today = useTodayState();
   const checkIn = useCheckIn();
@@ -37,7 +39,7 @@ export default function HomeScreen() {
     try {
       await checkIn.mutateAsync(mood);
     } catch (err) {
-      Alert.alert('לא הצלחנו לטעון משימה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא הצלחנו לטעון משימה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
