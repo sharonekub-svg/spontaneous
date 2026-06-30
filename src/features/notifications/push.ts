@@ -20,9 +20,7 @@ if (Platform.OS !== 'web') {
 
 function getProjectId(): string | undefined {
   return (
-    Constants.expoConfig?.extra?.eas?.projectId ??
-    // @ts-expect-error easConfig exists at runtime on some SDKs
-    Constants.easConfig?.projectId
+    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
   );
 }
 

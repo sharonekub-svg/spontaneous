@@ -19,13 +19,13 @@ interface State {
  * blank white screen. Never surfaces stack traces to the user.
  */
 export class ErrorBoundary extends React.Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     Sentry.captureException(error, {
       extra: { componentStack: info.componentStack },
     });
@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   private reset = () => this.setState({ hasError: false });
 
-  render() {
+  override render() {
     if (!this.state.hasError) return this.props.children;
 
     return (
