@@ -9,8 +9,6 @@ import { useAllBadges } from '@/features/badges/hooks';
 import { getProfileByUsername, getUserBadges } from '@/features/profile/api';
 import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
-import { LevelTags } from '@/features/profile/components/LevelTags';
-import { currentLevelTag } from '@/lib/levelTags';
 import { colors, spacing } from '@/theme';
 
 export default function PublicProfileScreen() {
@@ -88,18 +86,6 @@ export default function PublicProfileScreen() {
       </Card>
 
       <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Text variant="heading">תגים לפי רמה</Text>
-          {currentLevelTag(profile.level) ? (
-            <Text variant="caption" color={colors.textMuted}>
-              {currentLevelTag(profile.level)?.name}
-            </Text>
-          ) : null}
-        </View>
-        <LevelTags level={profile.level} />
-      </View>
-
-      <View style={styles.section}>
         <Text variant="heading">תגים</Text>
         <BadgeGrid badges={badges.data ?? []} earnedIds={earnedIds} />
       </View>
@@ -112,5 +98,4 @@ const styles = StyleSheet.create({
   head: { alignItems: 'center', gap: spacing.xs },
   headerCard: { marginTop: spacing.lg },
   section: { marginTop: spacing.xl, gap: spacing.md },
-  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });
