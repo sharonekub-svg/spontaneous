@@ -1,14 +1,15 @@
 // Supabase Edge Function: send-reminders
 //
 // Sends an Expo push notification to every user who hasn't done today's mission
-// yet. Intended to be invoked on a schedule (~3x/day) by pg_cron + pg_net — see
+// yet. Invoked on a schedule (~3x/day) by pg_cron + pg_net — see
 // docs/push-notifications.md.
 //
-// Required function secrets (supabase secrets set ...):
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  (auto-available in the runtime)
-//   CRON_SECRET  — a shared secret; the caller must send it as x-cron-secret.
+// Auth: requires a valid project JWT (verify_jwt) AND a matching x-cron-secret
+// header. The expected secret lives in a non-exposed `private` schema and is
+// read here via the service-role-only get_cron_secret() RPC, so holding the
+// public anon key is not enough to trigger this function.
 //
-// Deploy:  supabase functions deploy send-reminders --no-verify-jwt
+// Deploy:  supabase functions deploy send-reminders
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -28,16 +29,16 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 Deno.serve(async (req) => {
-  // Simple shared-secret guard so the endpoint can't be triggered by anyone.
-  const secret = Deno.env.get('CRON_SECRET');
-  if (secret && req.headers.get('x-cron-secret') !== secret) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   );
+
+  // Shared-secret guard: the expected value is only readable by the service role.
+  const { data: expectedSecret } = await supabase.rpc('get_cron_secret');
+  if (!expectedSecret || req.headers.get('x-cron-secret') !== expectedSecret) {
+    return new Response('Unauthorized', { status: 401 });
+  }
 
   const { data, error } = await supabase.rpc('tokens_for_reminders');
   if (error) {
