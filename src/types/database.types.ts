@@ -38,6 +38,7 @@ export interface ProfileRow {
   points: number;
   current_streak: number;
   longest_streak: number;
+  streak_freezes: number;
   last_completed_date: string | null;
   missions_completed: number;
   profile_frame: string | null;

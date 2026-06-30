@@ -47,6 +47,12 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
         />
         <StreakFlame streak={profile.current_streak} />
         <Stat
+          icon="snow"
+          color={colors.difficulty.medium}
+          value={String(profile.streak_freezes ?? 0)}
+          label="הקפאות"
+        />
+        <Stat
           icon="checkmark-done"
           color={colors.success}
           value={String(profile.missions_completed)}
