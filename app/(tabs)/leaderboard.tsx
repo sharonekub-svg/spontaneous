@@ -8,7 +8,7 @@ import {
   Button,
   EmptyState,
   ErrorState,
-  LoadingState,
+  ListSkeleton,
   Screen,
   SegmentedControl,
   Text,
@@ -104,7 +104,7 @@ export default function LeaderboardScreen() {
       </View>
 
       {leaderboard.isLoading ? (
-        <LoadingState />
+        <ListSkeleton rows={8} />
       ) : leaderboard.isError ? (
         <ErrorState onRetry={() => leaderboard.refetch()} />
       ) : (leaderboard.data?.length ?? 0) === 0 ? (

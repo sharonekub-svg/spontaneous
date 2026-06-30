@@ -9,5 +9,6 @@ export { ProgressBar } from './ProgressBar';
 export { Screen } from './Screen';
 export { SegmentedControl, type Segment } from './SegmentedControl';
 export { EmptyState, ErrorState, LoadingState } from './StateViews';
+export { Skeleton, MissionCardSkeleton, ListSkeleton } from './Skeleton';
 export { Text } from './Text';
 export { ToastProvider, useToast } from './Toast';
