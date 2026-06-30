@@ -1,0 +1,68 @@
+name: EAS Update (OTA)
+
+# "Edit code on GitHub -> the app changes" pipeline.
+#
+# On every push to main this publishes a new JavaScript bundle to EAS Update.
+# Any device running Spontani (Expo Go preview, a dev build, or a store build)
+# pulls the new bundle on next launch -- NO App Store, NO Apple account, NO review.
+#
+# The ONLY secret you need (add it later):
+#   EXPO_TOKEN  -> a free Expo access token from https://expo.dev/accounts/[you]/settings/access-tokens
+#
+# One-time, on your Mac (replaces the placeholder project id in app.json):
+#   npm i -g eas-cli && eas login && eas init && eas update:configure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "EAS Update branch to publish to"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production   # what real/store builds follow
+          - preview      # safe channel to preview in Expo Go first
+
+concurrency:
+  group: eas-update-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish OTA update
+    runs-on: ubuntu-latest          # no macOS needed for OTA bundles
+    timeout-minutes: 20
+
+    env:
+      # Build-time public config baked into the JS bundle (same vars web uses).
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish update
+        run: |
+          eas update \
+            --branch "${{ github.event.inputs.branch || 'production' }}" \
+            --message "${{ github.event.head_commit.message || 'manual update' }}" \
+            --non-interactive
