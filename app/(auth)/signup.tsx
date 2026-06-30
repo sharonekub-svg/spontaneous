@@ -20,8 +20,8 @@ export default function SignupScreen() {
       toast.error('בחרו שם משתמש', 'שם משתמש צריך לפחות 3 תווים.');
       return;
     }
-    if (password.length < 6) {
-      toast.error('סיסמה חלשה', 'השתמשו בלפחות 6 תווים.');
+    if (password.length < 8) {
+      toast.error('סיסמה חלשה', 'השתמשו בלפחות 8 תווים.');
       return;
     }
     setLoading(true);
@@ -69,7 +69,7 @@ export default function SignupScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          placeholder="לפחות 6 תווים"
+          placeholder="לפחות 8 תווים"
         />
         <Button label="צרו חשבון" onPress={handleSignup} loading={loading} fullWidth size="lg" />
       </View>
