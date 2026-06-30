@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -13,18 +13,21 @@ import {
   Pill,
   Screen,
   Text,
+  useToast,
 } from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCheckIn, useTodayState } from '@/features/missions/hooks';
 import { MoodSelector } from '@/features/missions/components/MoodSelector';
 import { useNotifications } from '@/features/notifications/hooks';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
+import { RewardBurst } from '@/features/missions/components/RewardBurst';
 import { colors, spacing } from '@/theme';
 import { pointsForMood } from '@/lib/points';
 import type { Mood } from '@/types/database.types';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const toast = useToast();
   const { profile, refreshProfile } = useAuth();
   const today = useTodayState();
   const checkIn = useCheckIn();
@@ -36,7 +39,7 @@ export default function HomeScreen() {
     try {
       await checkIn.mutateAsync(mood);
     } catch (err) {
-      Alert.alert('לא הצלחנו לטעון משימה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא הצלחנו לטעון משימה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -157,11 +160,14 @@ function ActiveMission({
         </View>
 
         {approved ? (
-          <View style={[styles.statusBox, { backgroundColor: `${colors.success}1A` }]}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text variant="subheading" color={colors.success}>
-              אושר! הפרסים נוספו.
-            </Text>
+          <View style={styles.approvedBox}>
+            <RewardBurst points={pointsForMood(state.checkinMood)} xp={mission.xp_reward} />
+            <View style={[styles.statusBox, { backgroundColor: `${colors.success}1A` }]}>
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+              <Text variant="subheading" color={colors.success}>
+                אושר! הפרסים נוספו.
+              </Text>
+            </View>
           </View>
         ) : pending ? (
           <View style={[styles.statusBox, { backgroundColor: `${colors.warning}1A` }]}>
@@ -234,4 +240,5 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   rejectedBox: { gap: spacing.md },
+  approvedBox: { gap: spacing.md },
 });

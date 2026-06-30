@@ -2,20 +2,23 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { Avatar, Button, Card, LoadingState, Pill, Screen, Text } from '@/components';
+import { Avatar, Button, Card, LoadingState, Pill, Screen, Text, useToast } from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useAllBadges } from '@/features/badges/hooks';
 import { useMissionHistory } from '@/features/missions/hooks';
 import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
+import { LevelTags } from '@/features/profile/components/LevelTags';
 import { useProfileStats, useUploadAvatar, useUserBadges } from '@/features/profile/hooks';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
+import { currentLevelTag } from '@/lib/levelTags';
 import { difficultyMeta, relativeTime } from '@/lib/format';
 import { colors, spacing } from '@/theme';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const toast = useToast();
   const { profile, isAdmin, signOut, refreshProfile, session } = useAuth();
   const userId = session?.user.id;
   const badges = useAllBadges();
@@ -39,8 +42,9 @@ export default function ProfileScreen() {
     if (!result.canceled && result.assets[0]) {
       try {
         await uploadAvatar.mutateAsync(result.assets[0].uri);
+        toast.success('התמונה עודכנה');
       } catch (err) {
-        Alert.alert('ההעלאה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+        toast.error('ההעלאה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
       }
     }
   }
@@ -82,6 +86,11 @@ export default function ProfileScreen() {
       <Card elevated style={styles.headerCard}>
         <LevelHeader profile={profile} />
       </Card>
+
+      {/* Level tags */}
+      <Section title="תגים לפי רמה" trailing={currentLevelTag(profile.level)?.name ?? undefined}>
+        <LevelTags level={profile.level} />
+      </Section>
 
       {/* Badges */}
       <Section title="תגים" trailing={`${earnedIds.size}/${badges.data?.length ?? 0}`}>

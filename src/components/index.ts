@@ -10,3 +10,4 @@ export { Screen } from './Screen';
 export { SegmentedControl, type Segment } from './SegmentedControl';
 export { EmptyState, ErrorState, LoadingState } from './StateViews';
 export { Text } from './Text';
+export { ToastProvider, useToast } from './Toast';

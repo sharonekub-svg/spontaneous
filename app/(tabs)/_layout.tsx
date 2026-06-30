@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -8,6 +9,11 @@ import { colors } from '@/theme';
 export default function TabsLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          Haptics.selectionAsync().catch(() => {});
+        },
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,

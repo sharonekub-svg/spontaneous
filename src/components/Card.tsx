@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import React from 'react';
 import {
   Pressable,
@@ -7,6 +8,7 @@ import {
   type ViewProps,
   type ViewStyle,
 } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { colors, radius, shadows, spacing } from '@/theme';
 
@@ -15,34 +17,61 @@ interface CardProps extends ViewProps {
   onPress?: () => void;
   elevated?: boolean;
   padded?: boolean;
+  haptic?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Surface container used for most content blocks. */
-export function Card({ children, onPress, elevated, padded = true, style, ...rest }: CardProps) {
-  const content = (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: elevated ? colors.surfaceElevated : colors.surface },
-        padded && styles.padded,
-        elevated && shadows.md,
-        style,
-      ]}
-      {...rest}
-    >
-      {children}
-    </View>
-  );
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/** Surface container used for most content blocks. Tappable cards get a springy
+ * press animation and light haptic feedback to match the app's buttons. */
+export function Card({
+  children,
+  onPress,
+  elevated,
+  padded = true,
+  haptic = true,
+  style,
+  ...rest
+}: CardProps) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const cardStyle = [
+    styles.card,
+    { backgroundColor: elevated ? colors.surfaceElevated : colors.surface },
+    padded && styles.padded,
+    elevated && shadows.md,
+    style,
+  ];
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
-        {content}
-      </Pressable>
+      <AnimatedPressable
+        accessibilityRole="button"
+        onPressIn={() => {
+          scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+        }}
+        onPress={() => {
+          if (haptic) Haptics.selectionAsync().catch(() => {});
+          onPress();
+        }}
+        style={[cardStyle, animatedStyle]}
+        {...rest}
+      >
+        {children}
+      </AnimatedPressable>
     );
   }
-  return content;
+
+  return (
+    <View style={cardStyle} {...rest}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -52,5 +81,4 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
   },
   padded: { padding: spacing.lg },
-  pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
 });

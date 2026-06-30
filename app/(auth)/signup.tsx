@@ -1,13 +1,14 @@
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Button, Input, Screen, Text } from '@/components';
+import { Button, Input, Screen, Text, useToast } from '@/components';
 import { signUpWithEmail } from '@/features/auth/api';
 import { colors, spacing } from '@/theme';
 
 export default function SignupScreen() {
   const router = useRouter();
+  const toast = useToast();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,20 +17,20 @@ export default function SignupScreen() {
   async function handleSignup() {
     const cleanUsername = username.trim().toLowerCase();
     if (cleanUsername.length < 3) {
-      Alert.alert('בחרו שם משתמש', 'שם משתמש צריך לפחות 3 תווים.');
+      toast.error('בחרו שם משתמש', 'שם משתמש צריך לפחות 3 תווים.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('סיסמה חלשה', 'השתמשו בלפחות 6 תווים.');
+      toast.error('סיסמה חלשה', 'השתמשו בלפחות 6 תווים.');
       return;
     }
     setLoading(true);
     try {
       await signUpWithEmail({ email: email.trim(), password, username: cleanUsername });
-      Alert.alert('נכנסת!', 'החשבון מוכן. בואו נמצא את המשימה הראשונה.');
+      toast.success('נכנסת!', 'החשבון מוכן. בואו נמצא את המשימה הראשונה.');
       router.replace('/(tabs)');
     } catch (err) {
-      Alert.alert('ההרשמה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('ההרשמה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
       setLoading(false);
     }
