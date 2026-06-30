@@ -9,10 +9,11 @@ import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ErrorBoundary, ToastProvider } from '@/components';
+import { ErrorBoundary, OfflineBanner, ToastProvider } from '@/components';
 import { AuthGate } from '@/features/auth/AuthGate';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
+import { initNetwork } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { colors } from '@/theme';
 
@@ -20,8 +21,9 @@ import { colors } from '@/theme';
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
-// Initialise error tracking as early as possible.
+// Initialise error tracking and connectivity awareness as early as possible.
 initSentry();
+initNetwork();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,6 +66,7 @@ function RootLayout() {
                 <Stack.Screen name="admin" />
               </Stack>
             </AuthGate>
+              <OfflineBanner />
             </AuthProvider>
           </QueryClientProvider>
         </ToastProvider>
