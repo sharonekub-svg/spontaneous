@@ -1,0 +1,108 @@
+name: iOS Deploy (TestFlight)
+
+# Builds the iOS app and ships it to App Store Connect / TestFlight on every
+# push to main. Because Spontani is an Expo *managed* app, the job runs
+# `expo prebuild` to generate the native ios/ project, then hands off to
+# Fastlane (see fastlane/Fastfile) for signing, building and uploading.
+#
+# - Pushes to main           → uploads to TestFlight   (lane: beta)
+# - Manual run "production"   → submits to App Store    (lane: release)
+#
+# All credentials live in GitHub repository secrets (see README → "iOS CI/CD").
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Fastlane lane to run"
+        required: true
+        default: "beta"
+        type: choice
+        options:
+          - beta      # → TestFlight
+          - release   # → App Store review
+          - promote   # → promote latest TestFlight build to App Store review
+
+# Never run two deploys for the same branch at once (avoids duplicate builds).
+concurrency:
+  group: ios-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-ios:
+    name: Build & upload to App Store Connect
+    runs-on: macos-15            # macOS runner is required to build an iOS app
+    timeout-minutes: 45
+
+    env:
+      # --- App identity (non-secret, but kept in env for the Fastfile/Appfile) ---
+      APP_IDENTIFIER: com.spontani.app
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APP_STORE_CONNECT_TEAM_ID }}
+
+      # --- App Store Connect API key (auth for match, build & upload) ---
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}   # base64 of AuthKey_XXXX.p8
+
+      # --- Fastlane Match (code-signing repo) ---
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      # Token used to clone the private certs repo over HTTPS.
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+
+      # --- App build-time public env (same vars the app uses elsewhere) ---
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+
+      # Keep Fastlane quiet & CI-friendly.
+      FASTLANE_HIDE_CHANGELOG: "true"
+      FASTLANE_SKIP_UPDATE_CHECK: "true"
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Ruby (for Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true   # installs the Gemfile and caches gems
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Generate native iOS project (expo prebuild)
+        run: npx expo prebuild --platform ios --no-install --clean
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Run Fastlane (${{ github.event.inputs.lane || 'beta' }})
+        run: bundle exec fastlane ios ${{ github.event.inputs.lane || 'beta' }}
+
+      - name: Upload IPA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spontani-ipa
+          path: build/*.ipa
+          if-no-files-found: ignore
+          retention-days: 7
