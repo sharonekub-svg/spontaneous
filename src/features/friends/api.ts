@@ -1,5 +1,23 @@
 import { supabase } from '@/lib/supabase';
-import type { FriendshipRow, ProfileRow } from '@/types/database.types';
+import type { Difficulty, FriendshipRow, ProfileRow } from '@/types/database.types';
+
+export interface FeedItem {
+  submission_id: string;
+  user_id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  mission_title: string;
+  difficulty: Difficulty;
+  reviewed_at: string;
+}
+
+/** Recent approved missions from the current user's accepted friends. */
+export async function getFriendsFeed(): Promise<FeedItem[]> {
+  const { data, error } = await supabase.rpc('friends_feed');
+  if (error) throw error;
+  return (data as FeedItem[]) ?? [];
+}
 
 export interface FriendEntry {
   friendship: FriendshipRow;

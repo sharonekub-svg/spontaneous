@@ -17,6 +17,8 @@ import {
   useToast,
 } from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { FriendsFeed } from '@/features/friends/components/FriendsFeed';
+import { useFriendsFeed } from '@/features/friends/hooks';
 import { useCheckIn, useTodayState } from '@/features/missions/hooks';
 import { MoodSelector } from '@/features/missions/components/MoodSelector';
 import { useNotifications } from '@/features/notifications/hooks';
@@ -32,6 +34,7 @@ export default function HomeScreen() {
   const { profile, refreshProfile } = useAuth();
   const today = useTodayState();
   const checkIn = useCheckIn();
+  const feed = useFriendsFeed();
   const { data: notifications } = useNotifications();
 
   const unread = (notifications ?? []).filter((n) => !n.is_read).length;
@@ -107,6 +110,16 @@ export default function HomeScreen() {
           />
         )}
       </View>
+
+      {/* Friends activity */}
+      {(feed.data?.length ?? 0) > 0 ? (
+        <View style={styles.section}>
+          <Text variant="heading" style={styles.feedTitle}>
+            מה החברים עשו
+          </Text>
+          <FriendsFeed items={feed.data ?? []} />
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -242,4 +255,5 @@ const styles = StyleSheet.create({
   },
   rejectedBox: { gap: spacing.md },
   approvedBox: { gap: spacing.md },
+  feedTitle: { marginBottom: spacing.md },
 });
