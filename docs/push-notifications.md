@@ -30,50 +30,21 @@ npx eas init        # creates the EAS project and writes the real projectId
 Then make a native build (dev build / TestFlight / APK) — push can't be tested
 in a web build or, reliably, in Expo Go.
 
-### 2. Apply the migration
+### 2. Backend — already deployed
 
-The `Database` workflow only runs on a `main` branch (which doesn't exist), so
-apply manually:
+The Supabase side is **already live** on the project:
 
-```bash
-supabase link --project-ref <PROJECT_REF>
-supabase db push
-```
+- migrations `push_tokens`, `cron_secret` applied;
+- edge function `send-reminders` deployed (verify_jwt on, requires the
+  `x-cron-secret` header — the secret lives in `private.config` and is read via
+  the service-role-only `get_cron_secret()` RPC, so the public anon key alone
+  cannot trigger it);
+- pg_cron job `send-reminders` scheduled at `0 6,11,16 * * *` (UTC ≈ 09:00 /
+  14:00 / 19:00 Israel), passing the secret from `private.config`.
 
-### 3. Deploy the Edge Function
-
-```bash
-supabase functions deploy send-reminders --no-verify-jwt
-supabase secrets set CRON_SECRET=<a-long-random-string>
-# SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
-```
-
-### 4. Schedule it (3×/day) with pg_cron
-
-Run this in the SQL editor once. Times are **UTC** — the example below is
-roughly 09:00 / 14:00 / 19:00 Israel time.
-
-```sql
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
-
--- Store the function URL + secret once (use Vault in production).
--- URL: https://<PROJECT_REF>.supabase.co/functions/v1/send-reminders
-
-select cron.schedule(
-  'send-reminders',
-  '0 6,11,16 * * *',                 -- 06:00, 11:00, 16:00 UTC
-  $$
-  select net.http_post(
-    url     := 'https://<PROJECT_REF>.supabase.co/functions/v1/send-reminders',
-    headers := jsonb_build_object(
-      'content-type', 'application/json',
-      'x-cron-secret', '<CRON_SECRET>'
-    )
-  );
-  $$
-);
-```
+To re-create this from scratch elsewhere, run `supabase db push` (applies the
+migrations) and `supabase functions deploy send-reminders`, then schedule the
+cron exactly as in `migrations` / the job below.
 
 To change the times, edit the cron expression (`minute hour * * *`). To stop:
 `select cron.unschedule('send-reminders');`
