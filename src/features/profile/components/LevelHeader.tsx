@@ -8,6 +8,8 @@ import { levelProgress } from '@/lib/leveling';
 import { colors, spacing } from '@/theme';
 import type { ProfileRow } from '@/types/database.types';
 
+import { StreakFlame } from './StreakFlame';
+
 /** Compact level + XP progress + key stats summary shown atop home/profile. */
 export function LevelHeader({ profile }: { profile: ProfileRow }) {
   const progress = levelProgress(profile.xp);
@@ -43,12 +45,7 @@ export function LevelHeader({ profile }: { profile: ProfileRow }) {
           value={compactNumber(profile.points)}
           label="נקודות"
         />
-        <Stat
-          icon="flame"
-          color={colors.warning}
-          value={String(profile.current_streak)}
-          label="רצף"
-        />
+        <StreakFlame streak={profile.current_streak} />
         <Stat
           icon="checkmark-done"
           color={colors.success}
