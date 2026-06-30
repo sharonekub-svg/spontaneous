@@ -1,10 +1,15 @@
 import { Redirect } from 'expo-router';
 import React from 'react';
 
+import { useAuth } from '@/features/auth/AuthProvider';
+
 /**
- * Entry route. The AuthGate (in the root layout) decides whether the user
- * lands in the app or on the auth screens; this simply points at the app.
+ * Entry route. Renders inside the root navigator (so redirecting here is safe)
+ * and points the user at the app or the auth screens based on session state.
+ * Deeper route protection is enforced by the AuthGate.
  */
 export default function Index() {
-  return <Redirect href="/(tabs)" />;
+  const { session, initializing } = useAuth();
+  if (initializing) return null;
+  return <Redirect href={session ? '/(tabs)' : '/login'} />;
 }
