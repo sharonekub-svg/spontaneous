@@ -27,8 +27,8 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signUpWithEmail({ email: email.trim(), password, username: cleanUsername });
-      toast.success('נכנסת!', 'החשבון מוכן. בואו נמצא את המשימה הראשונה.');
-      router.replace('/(tabs)');
+      toast.success('נכנסת!', 'החשבון מוכן. בואו נכיר את האפליקציה.');
+      router.replace('/onboarding');
     } catch (err) {
       toast.error('ההרשמה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     } finally {
