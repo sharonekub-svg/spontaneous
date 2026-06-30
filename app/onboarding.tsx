@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Button, Screen, Text } from '@/components';
-import { colors, radius, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 interface Slide {
   icon: keyof typeof Ionicons.glyphMap;
@@ -45,6 +45,8 @@ export default function OnboardingScreen() {
   function finish() {
     router.replace('/(tabs)');
   }
+
+  if (!slide) return null;
 
   return (
     <Screen gradient>
