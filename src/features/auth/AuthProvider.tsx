@@ -5,6 +5,8 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { supabase } from '@/lib/supabase';
 import type { ProfileRow } from '@/types/database.types';
 
+import { registerForPushNotifications } from '@/features/notifications/push';
+
 interface AuthContextValue {
   session: Session | null;
   profile: ProfileRow | null;
@@ -36,7 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;
       setSession(data.session);
-      if (data.session) await loadProfile(data.session.user.id);
+      if (data.session) {
+        await loadProfile(data.session.user.id);
+        registerForPushNotifications(data.session.user.id).catch(() => {});
+      }
       setInitializing(false);
     });
 
@@ -44,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(nextSession);
       if (nextSession) {
         await loadProfile(nextSession.user.id);
+        registerForPushNotifications(nextSession.user.id).catch(() => {});
       } else {
         setProfile(null);
         queryClient.clear();
