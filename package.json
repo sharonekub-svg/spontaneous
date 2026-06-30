@@ -24,6 +24,7 @@
     "@expo/vector-icons": "^14.0.4",
     "@opentelemetry/api": "^1.9.1",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/netinfo": "^11.4.1",
     "@sentry/react-native": "^6.10.0",
     "@shopify/flash-list": "1.7.1",
     "@supabase/supabase-js": "^2.45.4",
