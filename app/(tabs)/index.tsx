@@ -10,6 +10,7 @@ import {
   DifficultyTag,
   EmptyState,
   LoadingState,
+  MissionCardSkeleton,
   Pill,
   Screen,
   Text,
@@ -92,7 +93,7 @@ export default function HomeScreen() {
       {/* Daily flow */}
       <View style={styles.section}>
         {today.isLoading ? (
-          <LoadingState />
+          <MissionCardSkeleton />
         ) : !state?.checkinMood || !state.assignment ? (
           <MoodSelector
             onSelect={handleMood}
