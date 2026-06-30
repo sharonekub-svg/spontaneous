@@ -3,7 +3,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { queryKeys } from '@/lib/queryClient';
 
-import { getFriendIds, getFriends, removeFriend, respondToRequest, sendFriendRequest } from './api';
+import {
+  getFriendIds,
+  getFriends,
+  getFriendsFeed,
+  removeFriend,
+  respondToRequest,
+  sendFriendRequest,
+} from './api';
+
+export function useFriendsFeed() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.friendsFeed,
+    queryFn: getFriendsFeed,
+    enabled: Boolean(session),
+  });
+}
 
 export function useFriends() {
   const { session } = useAuth();
