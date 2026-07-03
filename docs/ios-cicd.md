@@ -7,7 +7,7 @@ manual lane to promote a tested build to the public App Store.
 **Stack:** Expo (managed) React Native · Fastlane · GitHub Actions (macOS runner)
 **Bundle ID:** `com.spontani.app`
 
-> **Why a macOS runner + `expo prebuild`?** Spontani is an Expo *managed* app, so
+> **Why a macOS runner + `expo prebuild`?** Spontani is an Expo _managed_ app, so
 > there is no committed `ios/` Xcode project. Building an `.ipa` requires macOS +
 > Xcode, so the workflow runs on a `macos-15` runner and regenerates the native
 > project with `expo prebuild` before Fastlane builds it. The `ios/` folder stays
@@ -17,13 +17,13 @@ manual lane to promote a tested build to the public App Store.
 
 ## Files in this repo
 
-| File | Purpose |
-|------|---------|
-| `fastlane/Appfile` | App + team identifiers (read from env, nothing secret committed). |
-| `fastlane/Matchfile` | Points Match at your private signing-certs repo. |
-| `fastlane/Fastfile` | `beta` (→ TestFlight), `release` (→ App Store), `promote` lanes. |
-| `Gemfile` | Pins Fastlane + CocoaPods for reproducible installs. |
-| `.github/workflows/ios-deploy.yml` | The CI workflow (push to `main` → TestFlight). |
+| File                               | Purpose                                                           |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `fastlane/Appfile`                 | App + team identifiers (read from env, nothing secret committed). |
+| `fastlane/Matchfile`               | Points Match at your private signing-certs repo.                  |
+| `fastlane/Fastfile`                | `beta` (→ TestFlight), `release` (→ App Store), `promote` lanes.  |
+| `Gemfile`                          | Pins Fastlane + CocoaPods for reproducible installs.              |
+| `.github/workflows/ios-deploy.yml` | The CI workflow (push to `main` → TestFlight).                    |
 
 ---
 
@@ -32,11 +32,11 @@ manual lane to promote a tested build to the public App Store.
 There are two CI signing strategies. **This setup uses both of the recommended
 pieces together:**
 
-1. **App Store Connect API Key (`.p8`)** — authenticates *all* App Store Connect
+1. **App Store Connect API Key (`.p8`)** — authenticates _all_ App Store Connect
    traffic (Match, build, upload). Unlike an Apple ID it has **no 2FA**, never
    expires unexpectedly, and is the only thing that works reliably in CI.
 2. **Fastlane Match** — stores your **distribution certificate + provisioning
-   profile** in a *separate private git repo*, AES-encrypted with a password.
+   profile** in a _separate private git repo_, AES-encrypted with a password.
    CI clones it read-only and installs the identities. No more "it works on my
    Mac" signing drift; every machine uses the exact same certs.
 
@@ -49,24 +49,30 @@ pieces together:**
 ## One-time setup
 
 ### 1. Apple prerequisites
+
 - Enrolled **Apple Developer Program** ($99/yr).
 - An **app record** created in App Store Connect for `com.spontani.app`
   (name “Spontani”). Create it once at https://appstoreconnect.apple.com → Apps → +.
 
 ### 2. Create an App Store Connect API Key
+
 App Store Connect → **Users and Access → Integrations → App Store Connect API**
 → **Generate API Key** (role: **App Manager**).
+
 - Download the `AuthKey_XXXXXXXXXX.p8` (**you can only download it once**).
 - Note the **Key ID** and the **Issuer ID** shown on that page.
 
 Base64-encode the key for the secret:
+
 ```bash
 base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy   # macOS — now paste into ASC_KEY_CONTENT
 ```
 
 ### 3. Create the Match certificates repo
+
 - Create an **empty private repo**, e.g. `sharonekub-svg/spontani-certs`.
 - On your Mac, from this project:
+
 ```bash
 bundle install
 # Authenticate Match + generate/store the App Store identity:
@@ -76,11 +82,14 @@ ASC_KEY_ID="..." ASC_ISSUER_ID="..." \
 ASC_KEY_CONTENT="$(base64 -i AuthKey_XXXX.p8)" \
 bundle exec fastlane match appstore
 ```
+
 Pick a strong **Match passphrase** when prompted — that becomes `MATCH_PASSWORD`.
 
 ### 4. Token to let CI clone the certs repo
+
 Create a fine-grained **Personal Access Token** (or deploy key) with **read**
 access to `spontani-certs`, then build the basic-auth value Match expects:
+
 ```bash
 echo -n "sharonekub-svg:github_pat_XXXX" | base64   # → MATCH_GIT_BASIC_AUTHORIZATION
 ```
@@ -91,18 +100,18 @@ echo -n "sharonekub-svg:github_pat_XXXX" | base64   # → MATCH_GIT_BASIC_AUTHOR
 
 **Repo → Settings → Secrets and variables → Actions → New repository secret.**
 
-| Secret | What it is |
-|--------|-----------|
-| `ASC_KEY_ID` | Key ID of the App Store Connect API key. |
-| `ASC_ISSUER_ID` | Issuer ID from the same API-key page. |
-| `ASC_KEY_CONTENT` | **Base64** of the `AuthKey_XXXX.p8` file. |
-| `APPLE_TEAM_ID` | Developer Portal Team ID (10 chars, e.g. `AB12CD34EF`). |
-| `APP_STORE_CONNECT_TEAM_ID` | App Store Connect team id (numeric). Needed only if your account belongs to multiple teams. |
-| `MATCH_GIT_URL` | HTTPS URL of the certs repo (`https://github.com/.../spontani-certs.git`). |
-| `MATCH_PASSWORD` | The passphrase that encrypts the Match repo. |
-| `MATCH_GIT_BASIC_AUTHORIZATION` | Base64 `user:token` so CI can clone the private certs repo. |
-| `EXPO_PUBLIC_SUPABASE_URL` | Already used by web deploy — reused at build time. |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Same. |
+| Secret                          | What it is                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| `ASC_KEY_ID`                    | Key ID of the App Store Connect API key.                                                    |
+| `ASC_ISSUER_ID`                 | Issuer ID from the same API-key page.                                                       |
+| `ASC_KEY_CONTENT`               | **Base64** of the `AuthKey_XXXX.p8` file.                                                   |
+| `APPLE_TEAM_ID`                 | Developer Portal Team ID (10 chars, e.g. `AB12CD34EF`).                                     |
+| `APP_STORE_CONNECT_TEAM_ID`     | App Store Connect team id (numeric). Needed only if your account belongs to multiple teams. |
+| `MATCH_GIT_URL`                 | HTTPS URL of the certs repo (`https://github.com/.../spontani-certs.git`).                  |
+| `MATCH_PASSWORD`                | The passphrase that encrypts the Match repo.                                                |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | Base64 `user:token` so CI can clone the private certs repo.                                 |
+| `EXPO_PUBLIC_SUPABASE_URL`      | Already used by web deploy — reused at build time.                                          |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Same.                                                                                       |
 
 ---
 
@@ -110,7 +119,7 @@ echo -n "sharonekub-svg:github_pat_XXXX" | base64   # → MATCH_GIT_BASIC_AUTHOR
 
 - **Push to `main`** → workflow runs the `beta` lane → new build appears in
   **TestFlight** (internal testers). Nothing goes public automatically.
-- **Manual production release** → Actions tab → *iOS Deploy* → **Run workflow**
+- **Manual production release** → Actions tab → _iOS Deploy_ → **Run workflow**
   → pick `release` → builds + submits to **App Store review**.
 - **Promote without rebuilding** → Run workflow → pick `promote` → submits the
   latest existing TestFlight build to review.

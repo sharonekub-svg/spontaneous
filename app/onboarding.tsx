@@ -75,10 +75,7 @@ export default function OnboardingScreen() {
           {SLIDES.map((_, i) => (
             <View
               key={i}
-              style={[
-                styles.dot,
-                i === index && { backgroundColor: colors.primary, width: 22 },
-              ]}
+              style={[styles.dot, i === index && { backgroundColor: colors.primary, width: 22 }]}
             />
           ))}
         </View>
