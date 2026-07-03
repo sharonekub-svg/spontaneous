@@ -14,6 +14,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -72,6 +73,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session) await loadProfile(session.user.id);
       },
       signOut: async () => {
+        await supabase.auth.signOut();
+      },
+      deleteAccount: async () => {
+        // Storage rows can't be deleted from SQL (Supabase protects
+        // storage.objects), so empty the user's folders here first; RLS
+        // limits deletion to the caller's own folder either way.
+        if (session) {
+          const uid = session.user.id;
+          for (const bucket of ['avatars', 'proofs']) {
+            const { data: files } = await supabase.storage.from(bucket).list(uid);
+            if (files?.length) {
+              await supabase.storage.from(bucket).remove(files.map((f) => `${uid}/${f.name}`));
+            }
+          }
+        }
+        const { error } = await supabase.rpc('delete_account');
+        if (error) throw error;
         await supabase.auth.signOut();
       },
     }),

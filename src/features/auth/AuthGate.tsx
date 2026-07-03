@@ -33,19 +33,31 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     // then fall through to the app once authenticated.
     pathname.startsWith('/auth-callback');
   const inAdminGroup = pathname.startsWith('/admin');
+  // Legal pages must be reachable logged-out (App Store reviewers open the
+  // privacy-policy URL without an account).
+  const inPublicPage = pathname.startsWith('/privacy');
 
   useEffect(() => {
     // Wait until the root navigator has mounted before navigating.
     if (!navigationState?.key || initializing) return;
 
-    if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup && !inPublicPage) {
       router.replace('/login');
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');
     } else if (inAdminGroup && !isAdmin) {
       router.replace('/(tabs)');
     }
-  }, [navigationState?.key, initializing, session, inAuthGroup, inAdminGroup, isAdmin, router]);
+  }, [
+    navigationState?.key,
+    initializing,
+    session,
+    inAuthGroup,
+    inAdminGroup,
+    inPublicPage,
+    isAdmin,
+    router,
+  ]);
 
   return (
     <>

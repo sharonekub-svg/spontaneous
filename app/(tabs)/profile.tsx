@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { Avatar, Button, Card, LoadingState, Pill, Screen, Text, useToast } from '@/components';
@@ -17,7 +17,35 @@ import { colors, spacing } from '@/theme';
 export default function ProfileScreen() {
   const router = useRouter();
   const toast = useToast();
-  const { profile, isAdmin, signOut, refreshProfile, session } = useAuth();
+  const { profile, isAdmin, signOut, deleteAccount, refreshProfile, session } = useAuth();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    },
+    [],
+  );
+
+  async function onDeleteAccount() {
+    if (!confirmDelete) {
+      // First tap arms the button; it disarms after 5s so an accidental tap
+      // can't linger as a one-tap account wipe.
+      setConfirmDelete(true);
+      confirmTimer.current = setTimeout(() => setConfirmDelete(false), 5000);
+      return;
+    }
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    setDeleting(true);
+    try {
+      await deleteAccount();
+    } catch (err) {
+      setDeleting(false);
+      setConfirmDelete(false);
+      toast.error('מחיקת החשבון נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+    }
+  }
   const userId = session?.user.id;
   const badges = useAllBadges();
   const earned = useUserBadges(userId);
@@ -161,7 +189,30 @@ export default function ProfileScreen() {
             icon={<Ionicons name="shield-checkmark" size={18} color={colors.textPrimary} />}
           />
         ) : null}
+        <Button
+          label="מדיניות פרטיות"
+          variant="ghost"
+          fullWidth
+          onPress={() => router.push('/privacy')}
+        />
         <Button label="התנתקות" variant="ghost" fullWidth onPress={signOut} />
+        <Button
+          label={
+            deleting
+              ? 'מוחק את החשבון…'
+              : confirmDelete
+                ? 'בטוח? לחיצה נוספת תמחק לצמיתות'
+                : 'מחיקת חשבון'
+          }
+          variant={confirmDelete ? 'danger' : 'ghost'}
+          fullWidth
+          disabled={deleting}
+          onPress={onDeleteAccount}
+          icon={<Ionicons name="trash-outline" size={18} color={colors.danger} />}
+        />
+        <Text variant="caption" color={colors.textMuted} center>
+          מחיקת החשבון מוחקת לצמיתות את הפרופיל, ההתקדמות וכל התוכן שהעלית.
+        </Text>
       </View>
     </Screen>
   );

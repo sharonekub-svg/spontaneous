@@ -6,7 +6,8 @@ name: Deploy web to GitHub Pages
 
 on:
   push:
-    branches: [claude/spontani-social-app-dqsklc]
+    # Works both before and after the default branch is renamed to main.
+    branches: [main, claude/spontani-social-app-dqsklc]
   workflow_dispatch:
 
 permissions:

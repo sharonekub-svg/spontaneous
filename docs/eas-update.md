@@ -7,8 +7,8 @@ the app downloads it on next launch. No App Store, no review, no $99 Apple fee.
 > **What this can and can't do.** OTA updates ship your **JS/TS** changes
 > (screens, logic, styles, text). They do **not** ship changes that need new
 > native code (adding a new native library, changing app icon/permissions). For
-> those you eventually need a real build — that's when the App Store / Fastlane
-> pipeline in `docs/ios-cicd.md` takes over.
+> those you eventually need a real build — that's when the App Store / TestFlight
+> pipeline in `docs/ci-cd-ios.md` takes over.
 
 ---
 
@@ -18,7 +18,7 @@ the app downloads it on next launch. No App Store, no review, no $99 Apple fee.
 | --------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Expo Go** (preview) | No                | Open the app on your phone to test. Install "Expo Go" from the store, sign into your free Expo account, open the published `preview` branch. Works for Expo-compatible modules. |
 | **Dev / store build** | Yes (later)       | A real installable app that follows the `production` branch and gets OTA updates.                                                                                               |
-| **App Store**         | Yes (later)       | Public release — see `docs/ios-cicd.md`.                                                                                                                                        |
+| **App Store**         | Yes (later)       | Public release — see `docs/ci-cd-ios.md`.                                                                                                                                       |
 
 OTA updates feed **all three** of the above via _branches_ (`preview`,
 `production`) configured in `eas.json`.
@@ -78,8 +78,8 @@ with your account → your projects → Spontani → launch the `preview` branch
 
 ## Summary of what's in the repo for you
 
-| Pipeline                       | File                                             | Needs                | Status                           |
-| ------------------------------ | ------------------------------------------------ | -------------------- | -------------------------------- |
-| **OTA updates (now)**          | `.github/workflows/eas-update.yml`               | free `EXPO_TOKEN`    | ready — add 1 secret             |
-| App Store / TestFlight (later) | `.github/workflows/ios-deploy.yml` + `fastlane/` | Apple Developer acct | ready — add keys when you enroll |
-| Web → Vercel (existing)        | `.github/workflows/deploy.yml`                   | Vercel secrets       | already live                     |
+| Pipeline                       | File                                      | Needs                | Status                           |
+| ------------------------------ | ----------------------------------------- | -------------------- | -------------------------------- |
+| **OTA updates (now)**          | `.github/workflows/eas-update.yml`        | free `EXPO_TOKEN`    | ready — add 1 secret             |
+| App Store / TestFlight (later) | `.github/workflows/ios-release.yml` (EAS) | Apple Developer acct | ready — add keys when you enroll |
+| Web → Vercel (existing)        | `.github/workflows/deploy.yml`            | Vercel secrets       | already live                     |
