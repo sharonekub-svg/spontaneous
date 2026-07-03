@@ -57,12 +57,22 @@ def analyze_listings(listings_csv: str, model: PriceModel) -> list[ListingVerdic
             continue
         city = row["city"].strip()
         hood = (row.get("neighborhood") or "").strip()
-        bench = model.lookup(city, hood)
-        if bench is None:
+
+        def _opt_float(key: str) -> float | None:
+            try:
+                return float(row.get(key) or "")
+            except ValueError:
+                return None
+
+        estimate = model.estimate_ppsqm(city, hood,
+                                        floor=_opt_float("floor"),
+                                        year_built=_opt_float("year_built"))
+        if estimate is None:
             continue  # אין נתוני אמת לעיר — אי אפשר לשפוט
+        ppsqm, bench = estimate
 
         condition = (row.get("condition") or "ok").strip()
-        market_value = bench.ppsqm_median * sqm
+        market_value = ppsqm * sqm
         sell_estimate = market_value * POST_RENO_VALUE_FACTOR.get(condition, 1.0)
         discount = (market_value - asking) / market_value * 100
 

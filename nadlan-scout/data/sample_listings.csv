@@ -1,10 +1,10 @@
-city,neighborhood,address,rooms,sqm,asking_price,condition,url
-חיפה,הדר,רחוב הרצל 12,3,70,620000,shabby,https://example.com/listing1
-חיפה,נווה שאנן,רחוב חניתה 5,3.5,75,1090000,ok,https://example.com/listing2
-באר שבע,שכונה ד,רחוב אברהם אבינו 8,3,62,540000,shabby,https://example.com/listing3
-באר שבע,רמות,רחוב יעלים 3,4,90,1350000,renovated,https://example.com/listing4
-עפולה,מרכז,רחוב ירושלים 22,3,70,590000,ok,https://example.com/listing5
-קרית גת,העיר העתיקה,שדרות גת 15,3.5,75,610000,shabby,https://example.com/listing6
-נתניה,מרכז העיר,רחוב הרצל 40,3,65,1160000,ok,https://example.com/listing7
-קרית גת,כרמי גת,רחוב הכרמים 7,4,90,745000,ok,https://example.com/listing8
-חיפה,קרית חיים,רחוב דגניה 18,3,70,690000,ok,https://example.com/listing9
+city,neighborhood,address,rooms,sqm,asking_price,condition,floor,year_built,url
+חיפה,הדר,רחוב הרצל 12,3,70,620000,shabby,2,1968,https://example.com/listing1
+חיפה,נווה שאנן,רחוב חניתה 5,3.5,75,1090000,ok,3,1990,https://example.com/listing2
+באר שבע,שכונה ד,רחוב אברהם אבינו 8,3,62,540000,shabby,1,1972,https://example.com/listing3
+באר שבע,רמות,רחוב יעלים 3,4,90,1350000,renovated,5,2008,https://example.com/listing4
+עפולה,מרכז,רחוב ירושלים 22,3,70,590000,ok,2,1985,https://example.com/listing5
+קרית גת,העיר העתיקה,שדרות גת 15,3.5,75,610000,shabby,3,1975,https://example.com/listing6
+נתניה,מרכז העיר,רחוב הרצל 40,3,65,1160000,ok,4,1995,https://example.com/listing7
+קרית גת,כרמי גת,רחוב הכרמים 7,4,90,745000,ok,4,2012,https://example.com/listing8
+חיפה,קרית חיים,רחוב דגניה 18,3,70,690000,ok,1,1980,https://example.com/listing9

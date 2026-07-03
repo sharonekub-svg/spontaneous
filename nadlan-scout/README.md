@@ -47,11 +47,12 @@ python3 scout.py model --deals data/deals.csv
 ממלאים קובץ CSV עם מודעות שמצאת (ביד2, מדל"ן, פייסבוק — ידנית):
 
 ```csv
-city,neighborhood,address,rooms,sqm,asking_price,condition,url
-קרית גת,כרמי גת,רחוב הכרמים 7,4,90,745000,ok,https://...
+city,neighborhood,address,rooms,sqm,asking_price,condition,floor,year_built,url
+קרית גת,כרמי גת,רחוב הכרמים 7,4,90,745000,ok,4,2012,https://...
 ```
 
-`condition`: ‏`shabby` (מוזנח) / `ok` (סביר) / `renovated` (משופץ)
+`condition`: ‏`shabby` (מוזנח) / `ok` (סביר) / `renovated` (משופץ).
+‏`floor` ו-`year_built` לא חובה — אבל אם הם שם, המודל מדייק את השווי לפיהם.
 
 ```bash
 python3 scout.py analyze --deals data/deals.csv --listings data/my_listings.csv
@@ -59,6 +60,38 @@ python3 scout.py analyze --deals data/deals.csv --listings data/my_listings.csv
 
 הפלט: כל מודעה מדורגת 🔥 דיל / 🟡 שווה בדיקה / ❌ עזוב, עם רווח נטו צפוי
 אחרי **כל** העלויות.
+
+### שלב 5: דשבורד, התראות ואוטומציה
+
+```bash
+# דשבורד HTML עם גרפים — נפתח בכל דפדפן, בלי אינטרנט
+python3 scout.py report --deals data/deals.csv --listings data/my_listings.csv
+
+# הוספת מודעה בלי לפתוח את הקובץ
+python3 scout.py add --city "קרית גת" --neighborhood "כרמי גת" \
+  --address "רחוב הכרמים 7" --sqm 90 --asking-price 745000 \
+  --condition ok --floor 4 --year-built 2012 --url "https://..."
+
+# בדיקה + התראת טלגרם על כל דיל חדש (להרצה יומית ב-cron)
+python3 scout.py watch --deals data/deals.csv --listings data/my_listings.csv
+
+# עדכון נתוני אוכלוסייה מ-data.gov.il וחישוב צמיחה אמיתית בין הרצות
+python3 scout.py refresh-cities
+```
+
+הגדרת טלגרם (חינם): יוצרים בוט אצל ‎@BotFather, ומגדירים משתני סביבה
+`TELEGRAM_BOT_TOKEN` ו-`TELEGRAM_CHAT_ID` (הוראות מלאות ב-`nadlan_scout/alerts.py`).
+בלי הגדרה, ההתראות מודפסות למסך.
+
+להרצה יומית אוטומטית בלינוקס/מק: `crontab -e` ולהוסיף
+`0 8 * * * cd /path/to/nadlan-scout && python3 scout.py watch --deals data/deals.csv --listings data/my_listings.csv`
+
+### מודל מחיר חכם
+
+המודל לא מסתפק בחציון לשכונה: הוא לומד מהעסקאות של כל עיר כמה
+**קומה** ו**גיל בניין** מזיזים את המחיר (רגרסיה, ללא ספריות), ומתקן את
+השווי לכל מודעה שיש בה `floor` ו-`year_built`. התיקון חסום ל-±15%
+כדי שרעש בנתונים לא ייצר הערכות הזויות.
 
 ### בונוס: מחשבון עסקה בודדת
 

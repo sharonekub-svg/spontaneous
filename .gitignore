@@ -50,3 +50,6 @@ supabase/.env
 nadlan-scout/**/__pycache__/
 nadlan-scout/data/deals.csv
 nadlan-scout/data/my_listings.csv
+nadlan-scout/data/report.html
+nadlan-scout/data/alert_state.json
+nadlan-scout/data/population_history.json

@@ -2,11 +2,15 @@
 """nadlan-scout — מערכת איתור עסקאות נדל"ן.
 
 פקודות:
-  fetch     הורדת עסקאות אמת מ-nadlan.gov.il (דורש אינטרנט פתוח)
-  cities    דירוג ערים לפי עתיד, כלכלה ומומנטום מחירים
-  model     הצגת מחירי שוק (₪/מ"ר) לפי עיר ושכונה
-  analyze   ניתוח קובץ מודעות ודירוג מהדיל הכי טוב להכי גרוע
-  calc      מחשבון עסקה בודדת (פליפ או השכרה)
+  fetch          הורדת עסקאות אמת מ-nadlan.gov.il (דורש אינטרנט פתוח)
+  cities         דירוג ערים לפי עתיד, כלכלה ומומנטום מחירים
+  model          הצגת מחירי שוק (₪/מ"ר) לפי עיר ושכונה
+  analyze        ניתוח קובץ מודעות ודירוג מהדיל הכי טוב להכי גרוע
+  calc           מחשבון עסקה בודדת (פליפ או השכרה)
+  add            הוספת מודעה חדשה לקובץ המודעות בשורת פקודה אחת
+  watch          ניתוח + התראת טלגרם על כל דיל חדש (לשים ב-cron יומי)
+  report         יצירת דשבורד HTML עם גרפים (data/report.html)
+  refresh-cities עדכון נתוני אוכלוסייה מ-data.gov.il וחישוב צמיחה אמיתית
 
 דוגמאות:
   python3 scout.py fetch --cities "חיפה,באר שבע" --out data/deals.csv
@@ -118,6 +122,50 @@ def cmd_calc(args) -> None:
         print(f"⚠️  {w}")
 
 
+LISTING_COLUMNS = ["city", "neighborhood", "address", "rooms", "sqm",
+                   "asking_price", "condition", "floor", "year_built", "url"]
+
+
+def cmd_add(args) -> None:
+    import csv
+    exists = os.path.exists(args.listings)
+    with open(args.listings, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=LISTING_COLUMNS, extrasaction="ignore")
+        if not exists:
+            writer.writeheader()
+        writer.writerow({col: getattr(args, col, "") or "" for col in LISTING_COLUMNS})
+    print(f"נוספה מודעה: {args.address} ({args.city}) → {args.listings}")
+
+
+def cmd_watch(args) -> None:
+    from nadlan_scout.alerts import check_and_alert
+    model = build_model(load_deals(args.deals))
+    verdicts = analyze_listings(args.listings, model)
+    sent = check_and_alert(verdicts)
+    print(f"נבדקו {len(verdicts)} מודעות, נשלחו {sent} התראות חדשות.")
+
+
+def cmd_report(args) -> None:
+    from nadlan_scout.city_scores import score_cities
+    from nadlan_scout.report import render_page
+    deals = load_deals(args.deals)
+    model = build_model(deals)
+    verdicts = analyze_listings(args.listings, model) if args.listings else []
+    scores = score_cities(args.cities_file, model)
+    label = os.path.basename(args.deals)
+    if "sample" in label:
+        label += " (נתוני דמו — הרץ fetch לנתוני אמת)"
+    with open(args.out, "w", encoding="utf-8") as f:
+        f.write(render_page(scores, deals, verdicts, label))
+    print(f"הדשבורד נוצר: {args.out} — פתח אותו בדפדפן.")
+
+
+def cmd_refresh_cities(args) -> None:
+    from nadlan_scout.refresh_cities import refresh
+    for change in refresh(args.cities_file):
+        print(change)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="nadlan-scout — איתור עסקאות נדל\"ן")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -150,6 +198,36 @@ def main() -> None:
     p.add_argument("--level", choices=["none", "light", "medium", "heavy"], default="medium")
     p.add_argument("--months", type=int, default=9)
     p.set_defaults(func=cmd_calc)
+
+    p = sub.add_parser("add", help="הוספת מודעה לקובץ המודעות")
+    p.add_argument("--listings", default="data/my_listings.csv")
+    p.add_argument("--city", required=True)
+    p.add_argument("--neighborhood", default="")
+    p.add_argument("--address", required=True)
+    p.add_argument("--rooms", default="")
+    p.add_argument("--sqm", required=True)
+    p.add_argument("--asking-price", dest="asking_price", required=True)
+    p.add_argument("--condition", choices=["shabby", "ok", "renovated"], default="ok")
+    p.add_argument("--floor", default="")
+    p.add_argument("--year-built", dest="year_built", default="")
+    p.add_argument("--url", default="")
+    p.set_defaults(func=cmd_add)
+
+    p = sub.add_parser("watch", help="ניתוח + התראות טלגרם על דילים חדשים")
+    p.add_argument("--deals", default=DEFAULT_DEALS)
+    p.add_argument("--listings", required=True)
+    p.set_defaults(func=cmd_watch)
+
+    p = sub.add_parser("report", help="יצירת דשבורד HTML")
+    p.add_argument("--deals", default=DEFAULT_DEALS)
+    p.add_argument("--listings", default=os.path.join(HERE, "data", "sample_listings.csv"))
+    p.add_argument("--cities-file", default=DEFAULT_CITIES)
+    p.add_argument("--out", default=os.path.join(HERE, "data", "report.html"))
+    p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("refresh-cities", help="עדכון נתוני אוכלוסייה מהממשלה")
+    p.add_argument("--cities-file", default=DEFAULT_CITIES)
+    p.set_defaults(func=cmd_refresh_cities)
 
     args = parser.parse_args()
     args.func(args)
