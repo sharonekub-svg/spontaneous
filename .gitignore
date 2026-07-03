@@ -45,3 +45,8 @@ supabase/.env
 
 # Vercel
 .vercel
+
+# nadlan-scout
+nadlan-scout/**/__pycache__/
+nadlan-scout/data/deals.csv
+nadlan-scout/data/my_listings.csv
