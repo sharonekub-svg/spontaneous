@@ -14,13 +14,13 @@ the app downloads it on next launch. No App Store, no review, no $99 Apple fee.
 
 ## The three ways to run Spontani
 
-| Way | Needs Apple acct? | What it's for |
-|-----|-------------------|---------------|
-| **Expo Go** (preview) | No | Open the app on your phone to test. Install "Expo Go" from the store, sign into your free Expo account, open the published `preview` branch. Works for Expo-compatible modules. |
-| **Dev / store build** | Yes (later) | A real installable app that follows the `production` branch and gets OTA updates. |
-| **App Store** | Yes (later) | Public release — see `docs/ios-cicd.md`. |
+| Way                   | Needs Apple acct? | What it's for                                                                                                                                                                   |
+| --------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Expo Go** (preview) | No                | Open the app on your phone to test. Install "Expo Go" from the store, sign into your free Expo account, open the published `preview` branch. Works for Expo-compatible modules. |
+| **Dev / store build** | Yes (later)       | A real installable app that follows the `production` branch and gets OTA updates.                                                                                               |
+| **App Store**         | Yes (later)       | Public release — see `docs/ios-cicd.md`.                                                                                                                                        |
 
-OTA updates feed **all three** of the above via *branches* (`preview`,
+OTA updates feed **all three** of the above via _branches_ (`preview`,
 `production`) configured in `eas.json`.
 
 ---
@@ -53,7 +53,7 @@ That's the whole list. **One secret** (`EXPO_TOKEN`) makes the pipeline live.
 
 - **Push to `main`** → `.github/workflows/eas-update.yml` publishes to the
   **`production`** branch. Devices on that branch update automatically.
-- **Manual preview** → Actions tab → *EAS Update* → **Run workflow** → pick
+- **Manual preview** → Actions tab → _EAS Update_ → **Run workflow** → pick
   `preview`. Open that branch in **Expo Go** to eyeball it before it goes to
   everyone.
 
@@ -65,6 +65,7 @@ That's the whole list. **One secret** (`EXPO_TOKEN`) makes the pipeline live.
 # locally, the classic way — runs a dev server, scan the QR with Expo Go:
 npx expo start
 ```
+
 Or open a **published** preview branch directly in Expo Go: sign into Expo Go
 with your account → your projects → Spontani → launch the `preview` branch.
 
@@ -77,8 +78,8 @@ with your account → your projects → Spontani → launch the `preview` branch
 
 ## Summary of what's in the repo for you
 
-| Pipeline | File | Needs | Status |
-|----------|------|-------|--------|
-| **OTA updates (now)** | `.github/workflows/eas-update.yml` | free `EXPO_TOKEN` | ready — add 1 secret |
+| Pipeline                       | File                                             | Needs                | Status                           |
+| ------------------------------ | ------------------------------------------------ | -------------------- | -------------------------------- |
+| **OTA updates (now)**          | `.github/workflows/eas-update.yml`               | free `EXPO_TOKEN`    | ready — add 1 secret             |
 | App Store / TestFlight (later) | `.github/workflows/ios-deploy.yml` + `fastlane/` | Apple Developer acct | ready — add keys when you enroll |
-| Web → Vercel (existing) | `.github/workflows/deploy.yml` | Vercel secrets | already live |
+| Web → Vercel (existing)        | `.github/workflows/deploy.yml`                   | Vercel secrets       | already live                     |

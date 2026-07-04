@@ -41,35 +41,35 @@ function RootLayout() {
       <SafeAreaProvider>
         <ErrorBoundary>
           <ToastProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <StatusBar style="light" />
-            <AuthGate>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.background },
-                  animation: 'slide_from_right',
-                }}
-              >
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="auth-callback" />
-                <Stack.Screen name="onboarding" />
-                <Stack.Screen name="mission/[id]" options={{ presentation: 'card' }} />
-                <Stack.Screen
-                  name="notifications"
-                  options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-                />
-                <Stack.Screen name="profile/[username]" />
-                <Stack.Screen name="group/[id]" />
-                <Stack.Screen name="admin" />
-              </Stack>
-            </AuthGate>
-              <OfflineBanner />
-            </AuthProvider>
-          </QueryClientProvider>
-        </ToastProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <StatusBar style="light" />
+                <AuthGate>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.background },
+                      animation: 'slide_from_right',
+                    }}
+                  >
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="auth-callback" />
+                    <Stack.Screen name="onboarding" />
+                    <Stack.Screen name="mission/[id]" options={{ presentation: 'card' }} />
+                    <Stack.Screen
+                      name="notifications"
+                      options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+                    />
+                    <Stack.Screen name="profile/[username]" />
+                    <Stack.Screen name="group/[id]" />
+                    <Stack.Screen name="admin" />
+                  </Stack>
+                </AuthGate>
+                <OfflineBanner />
+              </AuthProvider>
+            </QueryClientProvider>
+          </ToastProvider>
         </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>

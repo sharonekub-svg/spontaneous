@@ -19,9 +19,7 @@ if (Platform.OS !== 'web') {
 }
 
 function getProjectId(): string | undefined {
-  return (
-    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
-  );
+  return Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
 }
 
 /**

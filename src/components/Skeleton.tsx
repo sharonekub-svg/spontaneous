@@ -19,7 +19,12 @@ interface SkeletonProps {
 
 /** A single shimmering placeholder block. Compose these to mirror real content
  * layout while data loads — feels faster than a spinner. */
-export function Skeleton({ width = '100%', height = 16, borderRadius = radius.sm, style }: SkeletonProps) {
+export function Skeleton({
+  width = '100%',
+  height = 16,
+  borderRadius = radius.sm,
+  style,
+}: SkeletonProps) {
   const opacity = useSharedValue(0.4);
 
   useEffect(() => {
@@ -34,7 +39,11 @@ export function Skeleton({ width = '100%', height = 16, borderRadius = radius.sm
 
   return (
     <Animated.View
-      style={[{ width, height, borderRadius, backgroundColor: colors.surfaceElevated }, animatedStyle, style]}
+      style={[
+        { width, height, borderRadius, backgroundColor: colors.surfaceElevated },
+        animatedStyle,
+        style,
+      ]}
     />
   );
 }
