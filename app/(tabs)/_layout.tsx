@@ -35,13 +35,9 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="flame" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="browse"
-        options={{
-          title: 'משימות',
-          tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} />,
-        }}
-      />
+      {/* Missions browsing is hidden while the mission list is being re-curated
+          (proof-first missions). Restore the tab by putting back title+icon. */}
+      <Tabs.Screen name="browse" options={{ href: null }} />
       <Tabs.Screen
         name="leaderboard"
         options={{
