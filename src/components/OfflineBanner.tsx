@@ -19,10 +19,7 @@ export function OfflineBanner() {
   if (net.isConnected !== false) return null;
 
   return (
-    <View
-      pointerEvents="none"
-      style={[styles.bar, { paddingBottom: insets.bottom + spacing.sm }]}
-    >
+    <View pointerEvents="none" style={[styles.bar, { paddingBottom: insets.bottom + spacing.sm }]}>
       <Ionicons name="cloud-offline" size={16} color={colors.textPrimary} />
       <Text variant="caption" color={colors.textPrimary}>
         אין חיבור לאינטרנט

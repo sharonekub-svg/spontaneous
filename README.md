@@ -194,7 +194,8 @@ display.
 on push to `main`. Add these repository secrets:
 
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
-- `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+
+The public `EXPO_PUBLIC_*` values are read from the committed `.env.production`.
 
 Or connect the repo directly in the Vercel dashboard — `vercel.json` already
 defines the build/output.
