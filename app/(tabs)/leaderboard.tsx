@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -12,6 +12,7 @@ import {
   Screen,
   SegmentedControl,
   Text,
+  useToast,
   type Segment,
 } from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -38,14 +39,16 @@ const INVITE_MESSAGE = [
   '• למי שיש את הסטריק הכי גבוה (הכי הרבה ימים ברצף) נשאר למעלה.',
   '• הדירוג היומי/שבועי/חודשי מתאפס בכל תקופה — מתחילים מחדש כל שבוע.',
   '',
+  'מצטרפים כאן: https://sharonekub-svg.github.io/spontaneous/',
+  '',
   'בוא נראה מי מנצח!',
 ].join('\n');
 
-async function inviteOnWhatsApp() {
+async function inviteOnWhatsApp(onUnavailable: () => void) {
   const url = `https://wa.me/?text=${encodeURIComponent(INVITE_MESSAGE)}`;
   const ok = await Linking.canOpenURL(url);
   if (!ok) {
-    Alert.alert('וואטסאפ לא זמין', 'לא הצלחנו לפתוח את וואטסאפ במכשיר הזה.');
+    onUnavailable();
     return;
   }
   await Linking.openURL(url);
@@ -53,6 +56,7 @@ async function inviteOnWhatsApp() {
 
 export default function LeaderboardScreen() {
   const router = useRouter();
+  const toast = useToast();
   const { session } = useAuth();
   const [scope, setScope] = useState<LeaderboardScope>('weekly');
   const [explainOpen, setExplainOpen] = useState(false);
@@ -94,7 +98,11 @@ export default function LeaderboardScreen() {
           label="הזמינו חברים בוואטסאפ"
           variant="secondary"
           fullWidth
-          onPress={inviteOnWhatsApp}
+          onPress={() =>
+            inviteOnWhatsApp(() =>
+              toast.error('וואטסאפ לא זמין', 'לא הצלחנו לפתוח את וואטסאפ במכשיר הזה.'),
+            )
+          }
           icon={<Ionicons name="logo-whatsapp" size={18} color={colors.success} />}
         />
       </View>
