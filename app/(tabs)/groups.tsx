@@ -1,15 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Avatar, Button, Card, EmptyState, Input, LoadingState, Screen, Text } from '@/components';
+import {
+  Avatar,
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  LoadingState,
+  Screen,
+  Text,
+  useToast,
+} from '@/components';
 import { useCreateGroup, useJoinGroup, useMyGroups } from '@/features/groups/hooks';
 import { useFriends, useRespondToRequest, useSendFriendRequest } from '@/features/friends/hooks';
 import { colors, spacing } from '@/theme';
 
 export default function GroupsScreen() {
   const router = useRouter();
+  const toast = useToast();
   const groups = useMyGroups();
   const friends = useFriends();
   const createGroup = useCreateGroup();
@@ -24,21 +35,22 @@ export default function GroupsScreen() {
   async function handleCreate() {
     if (groupName.trim().length < 2) return;
     try {
-      await createGroup.mutateAsync({ name: groupName.trim(), description: '' });
+      const group = await createGroup.mutateAsync({ name: groupName.trim(), description: '' });
       setGroupName('');
+      toast.success('הקבוצה נוצרה!', `קוד ההזמנה: ${group.invite_code}`);
     } catch (err) {
-      Alert.alert('לא ניתן ליצור קבוצה', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא ניתן ליצור קבוצה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
   async function handleJoin() {
     if (!inviteCode.trim()) return;
     try {
-      await joinGroup.mutateAsync(inviteCode.trim());
+      const group = await joinGroup.mutateAsync(inviteCode.trim());
       setInviteCode('');
-      Alert.alert('הצטרפת!', 'ברוכים הבאים לקבוצה.');
+      toast.success('הצטרפת!', `ברוכים הבאים ל"${group.name}".`);
     } catch (err) {
-      Alert.alert('לא ניתן להצטרף', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא ניתן להצטרף', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
@@ -47,9 +59,9 @@ export default function GroupsScreen() {
     try {
       await sendRequest.mutateAsync(friendName.trim());
       setFriendName('');
-      Alert.alert('הבקשה נשלחה', 'הם יופיעו ברגע שיאשרו.');
+      toast.success('הבקשה נשלחה', 'הם יופיעו ברגע שיאשרו.');
     } catch (err) {
-      Alert.alert('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
+      toast.error('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 

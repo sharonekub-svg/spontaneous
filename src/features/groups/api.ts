@@ -43,46 +43,23 @@ export async function getGroupMembers(groupId: string): Promise<GroupMemberWithP
   return (data as GroupMemberWithProfile[]) ?? [];
 }
 
+// Creation is a SECURITY DEFINER RPC so the group and the owner's membership
+// are inserted atomically (no orphan groups if the second insert fails).
 export async function createGroup(name: string, description: string): Promise<GroupRow> {
-  const { data: userData } = await supabase.auth.getUser();
-  const me = userData.user?.id;
-  if (!me) throw new Error('Not authenticated');
-
-  const { data: group, error } = await supabase
-    .from('groups')
-    .insert({ name, description, owner_id: me })
-    .select('*')
-    .single();
-  if (error) throw error;
-
-  const { error: memberError } = await supabase.from('group_members').insert({
-    group_id: (group as GroupRow).id,
-    user_id: me,
-    role: 'owner',
+  const { data, error } = await supabase.rpc('create_group', {
+    group_name: name,
+    group_description: description,
   });
-  if (memberError) throw memberError;
-  return group as GroupRow;
+  if (error) throw error;
+  return data as GroupRow;
 }
 
+// Joining is a SECURITY DEFINER RPC: non-members can't read groups under RLS,
+// so the invite-code lookup has to happen server-side.
 export async function joinGroupByCode(inviteCode: string): Promise<GroupRow> {
-  const { data: userData } = await supabase.auth.getUser();
-  const me = userData.user?.id;
-  if (!me) throw new Error('Not authenticated');
-
-  const { data: group } = await supabase
-    .from('groups')
-    .select('*')
-    .eq('invite_code', inviteCode.toUpperCase())
-    .maybeSingle();
-  if (!group) throw new Error('No group found for that code');
-
-  const { error } = await supabase.from('group_members').insert({
-    group_id: (group as GroupRow).id,
-    user_id: me,
-    role: 'member',
-  });
-  if (error && error.code !== '23505') throw error; // ignore "already a member"
-  return group as GroupRow;
+  const { data, error } = await supabase.rpc('join_group_with_code', { code: inviteCode });
+  if (error) throw error;
+  return data as GroupRow;
 }
 
 export async function leaveGroup(groupId: string): Promise<void> {

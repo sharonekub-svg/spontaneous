@@ -2,18 +2,36 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Card, LoadingState, Screen, Text } from '@/components';
+import { Button, Card, LoadingState, Screen, Text, useToast } from '@/components';
 import { useLeaderboard } from '@/features/leaderboard/hooks';
 import { LeaderboardRow } from '@/features/leaderboard/components/LeaderboardRow';
 import { useGroupMembers, useLeaveGroup, useMyGroups } from '@/features/groups/hooks';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { colors, spacing } from '@/theme';
 
+const LEAVE_TITLE = 'לעזוב את הקבוצה?';
+const LEAVE_MESSAGE = 'תוכלו להצטרף שוב מאוחר יותר עם קוד ההזמנה.';
+
+// React Native's Alert is a no-op on web, so the confirmation has to go
+// through window.confirm there or the button would silently do nothing.
+function confirmLeave(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    return Promise.resolve(window.confirm(`${LEAVE_TITLE}\n${LEAVE_MESSAGE}`));
+  }
+  return new Promise((resolve) => {
+    Alert.alert(LEAVE_TITLE, LEAVE_MESSAGE, [
+      { text: 'ביטול', style: 'cancel', onPress: () => resolve(false) },
+      { text: 'עזיבה', style: 'destructive', onPress: () => resolve(true) },
+    ]);
+  });
+}
+
 export default function GroupDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const toast = useToast();
   const { session } = useAuth();
   const groups = useMyGroups();
   const members = useGroupMembers(id);
@@ -25,21 +43,17 @@ export default function GroupDetailScreen() {
   async function copyCode() {
     if (!group) return;
     await Clipboard.setStringAsync(group.invite_code);
-    Alert.alert('הועתק!', `קוד ההזמנה ${group.invite_code} הועתק.`);
+    toast.success('הועתק!', `קוד ההזמנה ${group.invite_code} הועתק.`);
   }
 
   async function handleLeave() {
-    Alert.alert('לעזוב את הקבוצה?', 'תוכלו להצטרף שוב מאוחר יותר עם קוד ההזמנה.', [
-      { text: 'ביטול', style: 'cancel' },
-      {
-        text: 'עזיבה',
-        style: 'destructive',
-        onPress: async () => {
-          await leaveGroup.mutateAsync(id as string);
-          router.back();
-        },
-      },
-    ]);
+    if (!(await confirmLeave())) return;
+    try {
+      await leaveGroup.mutateAsync(id as string);
+      router.back();
+    } catch (err) {
+      toast.error('לא ניתן לעזוב', err instanceof Error ? err.message : 'נסו שוב.');
+    }
   }
 
   if (!group)
