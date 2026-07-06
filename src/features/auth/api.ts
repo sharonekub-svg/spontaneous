@@ -94,6 +94,17 @@ export function isAppleAuthAvailable() {
   return Platform.OS === 'ios';
 }
 
+/**
+ * Guest sign-in. Creates an anonymous Supabase user (the profile bootstrap
+ * trigger gives it a generated "player" username), so people — and App Review —
+ * can try the app without registering. Requires "Anonymous sign-ins" to be
+ * enabled in the Supabase project's Auth settings.
+ */
+export async function signInAsGuest() {
+  const { error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+}
+
 /** Empties a user's folder in a storage bucket (best-effort). */
 async function emptyUserFolder(bucket: 'avatars' | 'proofs', userId: string) {
   const { data } = await supabase.storage.from(bucket).list(userId, { limit: 1000 });

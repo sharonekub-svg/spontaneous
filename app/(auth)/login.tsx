@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Input, Screen, Text, useToast } from '@/components';
 import {
   isAppleAuthAvailable,
+  signInAsGuest,
   signInWithApple,
   signInWithEmail,
   signInWithGoogle,
@@ -41,6 +42,18 @@ export default function LoginScreen() {
       else await signInWithApple();
     } catch (err) {
       toast.error('ההתחברות נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+    }
+  }
+
+  async function handleGuest() {
+    setLoading(true);
+    try {
+      await signInAsGuest();
+      router.replace('/(tabs)');
+    } catch (err) {
+      toast.error('הכניסה כאורח נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -104,6 +117,13 @@ export default function LoginScreen() {
             icon={<Ionicons name="logo-apple" size={18} color={colors.textPrimary} />}
           />
         ) : null}
+        <Button
+          label="המשך כאורח"
+          variant="ghost"
+          fullWidth
+          onPress={handleGuest}
+          icon={<Ionicons name="person-outline" size={18} color={colors.textSecondary} />}
+        />
       </View>
 
       <View style={styles.footer}>

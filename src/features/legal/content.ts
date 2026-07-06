@@ -9,7 +9,7 @@
  * support address / company details before launch.
  */
 
-export const SUPPORT_EMAIL = 'support@spontani.app';
+export const SUPPORT_EMAIL = 'sharonekub@gmail.com';
 export const LEGAL_EFFECTIVE_DATE = '6 ביולי 2026';
 
 export interface LegalSection {
