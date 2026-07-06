@@ -13,7 +13,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#0E0B1A"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.spontani.app",
@@ -30,7 +32,12 @@
         "backgroundColor": "#0E0B1A"
       },
       "package": "com.spontani.app",
-      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_MEDIA_IMAGES", "READ_MEDIA_VIDEO"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -71,6 +78,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e8725012-833f-44f8-8c44-cef6019ca211"
+      }
+    },
+    "owner": "sharone1231"
   }
 }
