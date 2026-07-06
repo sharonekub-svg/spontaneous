@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy_retry.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,4 +53,17 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      # Push-triggered deploys intermittently fail server-side with
+      # "Deployment failed, try again later." while an immediate retry of the
+      # same commit succeeds — so retry once before failing the workflow.
+      - name: Wait before retry
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 30
+
+      - name: Deploy to GitHub Pages (retry)
+        id: deploy_retry
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
