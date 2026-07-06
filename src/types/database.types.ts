@@ -15,6 +15,8 @@ export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
 export type GroupRole = 'owner' | 'admin' | 'member';
 export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
 export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary';
+export type ReportTargetType = 'submission' | 'user' | 'group';
+export type ReportStatus = 'open' | 'resolved' | 'dismissed';
 export type NotificationType =
   | 'daily_reminder'
   | 'mission_available'
@@ -166,6 +168,18 @@ export interface FriendshipRow {
   status: FriendshipStatus;
   created_at: string;
   updated_at: string;
+}
+
+export interface ReportRow {
+  id: string;
+  reporter_id: string | null;
+  target_type: ReportTargetType;
+  target_id: string;
+  reason: string;
+  status: ReportStatus;
+  resolved_by: string | null;
+  created_at: string;
+  resolved_at: string | null;
 }
 
 export interface NotificationRow {

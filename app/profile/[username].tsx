@@ -2,10 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar, Card, ErrorState, LoadingState, Pill, Screen, Text } from '@/components';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useAllBadges } from '@/features/badges/hooks';
+import { useIsBlocked } from '@/features/moderation/hooks';
+import { useModeration } from '@/features/moderation/useModeration';
 import { getProfileByUsername, getUserBadges } from '@/features/profile/api';
 import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
@@ -16,6 +19,8 @@ import { colors, spacing } from '@/theme';
 export default function PublicProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
   const router = useRouter();
+  const { session } = useAuth();
+  const { promptReport, promptBlock, promptUnblock } = useModeration();
   const badges = useAllBadges();
 
   const profileQuery = useQuery({
@@ -35,6 +40,26 @@ export default function PublicProfileScreen() {
     [userBadges.data],
   );
 
+  const targetId = profileQuery.data?.id;
+  const isOther = Boolean(targetId && targetId !== session?.user.id);
+  const blocked = useIsBlocked(isOther ? targetId : undefined);
+
+  function openModerationMenu() {
+    if (!targetId) return;
+    const name = profileQuery.data?.display_name || profileQuery.data?.username || 'המשתמש';
+    Alert.alert('אפשרויות', undefined, [
+      { text: 'דיווח על המשתמש', onPress: () => promptReport('user', targetId) },
+      blocked.data
+        ? { text: 'ביטול חסימה', onPress: () => promptUnblock(targetId, name) }
+        : {
+            text: 'חסימת המשתמש',
+            style: 'destructive',
+            onPress: () => promptBlock(targetId, name),
+          },
+      { text: 'ביטול', style: 'cancel' },
+    ]);
+  }
+
   if (profileQuery.isLoading)
     return (
       <Screen>
@@ -53,10 +78,29 @@ export default function PublicProfileScreen() {
 
   return (
     <Screen scroll>
-      <Pressable onPress={() => router.back()} style={styles.back}>
-        <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-        <Text variant="body">חזרה</Text>
-      </Pressable>
+      <View style={styles.topBar}>
+        <Pressable onPress={() => router.back()} style={styles.back}>
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
+          <Text variant="body">חזרה</Text>
+        </Pressable>
+        {isOther ? (
+          <Pressable
+            onPress={openModerationMenu}
+            hitSlop={12}
+            accessibilityLabel="אפשרויות דיווח וחסימה"
+          >
+            <Ionicons name="ellipsis-horizontal" size={22} color={colors.textPrimary} />
+          </Pressable>
+        ) : null}
+      </View>
+
+      {blocked.data ? (
+        <Card style={styles.blockedBanner}>
+          <Text variant="bodyMuted" color={colors.textSecondary}>
+            חסמתם את המשתמש הזה. אתם לא רואים את פעילותו.
+          </Text>
+        </Card>
+      ) : null}
 
       <View style={styles.head}>
         <Avatar
@@ -108,7 +152,14 @@ export default function PublicProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  back: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.md },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  back: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  blockedBanner: { marginBottom: spacing.md },
   head: { alignItems: 'center', gap: spacing.xs },
   headerCard: { marginTop: spacing.lg },
   section: { marginTop: spacing.xl, gap: spacing.md },

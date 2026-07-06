@@ -11,6 +11,35 @@ Legend: 🔴 hard blocker (Apple *will* reject) · 🟠 likely rejection / requi
 
 ---
 
+## ✅ Implemented in this branch
+
+The code-side blockers are now built. What still remains is **operational /
+App Store Connect setup** (below) — things that can't be done from the repo.
+
+- **In-app account deletion** — `deleteAccount()` empties the user's storage
+  folders then calls the existing `delete_account()` RPC and signs out. Wired to
+  a confirmed "מחיקת חשבון" action on the Profile screen. *(Blocker 1)*
+- **Report content/users** — `reports`-backed `submitReport()` + a reason picker,
+  surfaced on public profiles (report user) and the friends feed (report a
+  submission). *(Blocker 2)*
+- **Block users** — new `block_user` / `unblock_user` / `is_blocked` RPCs
+  (`supabase/migrations/20260706150000_moderation_block_and_report.sql`); block/
+  unblock actions on profiles; `friends_feed` now excludes blocked users. *(Blocker 3)*
+- **Terms of Use + Privacy Policy** — Hebrew docs with a zero-tolerance clause,
+  served at `/legal/terms` and `/legal/privacy` (in-app **and** as public web URLs
+  for App Store Connect), linked from Settings and accepted at sign-up. *(Blockers 4, 5)*
+
+> The moderation migration deploys through the existing `database.yml` CI on
+> merge (it is **not** yet applied to the live project). Set a real, monitored
+> `SUPPORT_EMAIL` in `src/features/legal/content.ts` and have the legal text
+> reviewed before launch.
+
+Still to do by hand: **Blocker 6** (real EAS `projectId` + `updates.url` via
+`eas init`) and everything in the 🟠 / 🟡 sections — all App Store Connect
+setup, not code.
+
+---
+
 ## 🔴 Hard blockers — will be rejected until fixed
 
 ### 1. In-app account deletion is not wired up

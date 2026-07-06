@@ -63,6 +63,8 @@ function RootLayout() {
                     />
                     <Stack.Screen name="profile/[username]" />
                     <Stack.Screen name="group/[id]" />
+                    <Stack.Screen name="legal/terms" />
+                    <Stack.Screen name="legal/privacy" />
                     <Stack.Screen name="admin" />
                   </Stack>
                 </AuthGate>

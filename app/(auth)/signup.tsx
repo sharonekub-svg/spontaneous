@@ -72,6 +72,21 @@ export default function SignupScreen() {
           placeholder="לפחות 8 תווים"
         />
         <Button label="צרו חשבון" onPress={handleSignup} loading={loading} fullWidth size="lg" />
+        <Text variant="caption" color={colors.textMuted} center>
+          ביצירת חשבון אתם מסכימים{' '}
+          <Link href="/legal/terms">
+            <Text variant="caption" color={colors.primary}>
+              לתנאי השימוש
+            </Text>
+          </Link>{' '}
+          ול
+          <Link href="/legal/privacy">
+            <Text variant="caption" color={colors.primary}>
+              מדיניות הפרטיות
+            </Text>
+          </Link>
+          .
+        </Text>
       </View>
 
       <View style={styles.footer}>

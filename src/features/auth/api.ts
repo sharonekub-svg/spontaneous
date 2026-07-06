@@ -93,3 +93,33 @@ export async function signInWithApple() {
 export function isAppleAuthAvailable() {
   return Platform.OS === 'ios';
 }
+
+/** Empties a user's folder in a storage bucket (best-effort). */
+async function emptyUserFolder(bucket: 'avatars' | 'proofs', userId: string) {
+  const { data } = await supabase.storage.from(bucket).list(userId, { limit: 1000 });
+  const paths = (data ?? []).map((f) => `${userId}/${f.name}`);
+  if (paths.length > 0) {
+    await supabase.storage.from(bucket).remove(paths);
+  }
+}
+
+/**
+ * Permanently deletes the signed-in user's account (App Store Guideline
+ * 5.1.1(v)). We first empty the user's storage folders — Supabase blocks plain
+ * SQL deletes on storage.objects — then call the SECURITY DEFINER RPC, which
+ * removes the auth user and cascades through every user-owned row. Finally we
+ * sign out to clear the local session.
+ */
+export async function deleteAccount() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+  if (!userId) throw new Error('Not authenticated');
+
+  await emptyUserFolder('avatars', userId).catch(() => {});
+  await emptyUserFolder('proofs', userId).catch(() => {});
+
+  const { error } = await supabase.rpc('delete_account');
+  if (error) throw error;
+
+  await supabase.auth.signOut();
+}

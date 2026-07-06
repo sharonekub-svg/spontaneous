@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
-import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, Linking, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { Avatar, Button, Card, LoadingState, Pill, Screen, Text, useToast } from '@/components';
+import { deleteAccount } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { SUPPORT_EMAIL } from '@/features/legal/content';
 import { useAllBadges } from '@/features/badges/hooks';
 import { useMissionHistory } from '@/features/missions/hooks';
 import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
@@ -26,6 +28,7 @@ export default function ProfileScreen() {
   const stats = useProfileStats(userId);
   const history = useMissionHistory(userId);
   const uploadAvatar = useUploadAvatar();
+  const [deleting, setDeleting] = useState(false);
 
   const earnedIds = useMemo(
     () => new Set((earned.data ?? []).map((e) => e.badge_id)),
@@ -47,6 +50,30 @@ export default function ProfileScreen() {
         toast.error('ההעלאה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
       }
     }
+  }
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      'מחיקת חשבון',
+      'הפעולה תמחק לצמיתות את הפרופיל, ההוכחות, הנקודות וההיסטוריה שלכם. אי אפשר לשחזר.',
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: 'מחיקה לצמיתות',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await deleteAccount();
+              // AuthProvider clears the session and AuthGate redirects to login.
+            } catch (err) {
+              toast.error('המחיקה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
   }
 
   if (!profile) return <LoadingState />;
@@ -158,6 +185,28 @@ export default function ProfileScreen() {
         )}
       </Section>
 
+      {/* Legal & support */}
+      <Section title="מידע ותמיכה">
+        <Card>
+          <LinkRow
+            icon="document-text-outline"
+            label="תנאי שימוש"
+            onPress={() => router.push('/legal/terms')}
+          />
+          <LinkRow
+            icon="lock-closed-outline"
+            label="מדיניות פרטיות"
+            onPress={() => router.push('/legal/privacy')}
+          />
+          <LinkRow
+            icon="mail-outline"
+            label="יצירת קשר ותמיכה"
+            onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+            last
+          />
+        </Card>
+      </Section>
+
       <View style={styles.actions}>
         {isAdmin ? (
           <Button
@@ -169,8 +218,37 @@ export default function ProfileScreen() {
           />
         ) : null}
         <Button label="התנתקות" variant="ghost" fullWidth onPress={signOut} />
+        <Button
+          label="מחיקת חשבון"
+          variant="ghost"
+          fullWidth
+          loading={deleting}
+          onPress={confirmDeleteAccount}
+        />
       </View>
     </Screen>
+  );
+}
+
+function LinkRow({
+  icon,
+  label,
+  onPress,
+  last,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  return (
+    <Pressable onPress={onPress} style={[styles.linkRow, last ? undefined : styles.linkDivider]}>
+      <Ionicons name={icon} size={18} color={colors.textSecondary} />
+      <Text variant="body" style={styles.flex}>
+        {label}
+      </Text>
+      <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
+    </Pressable>
   );
 }
 
@@ -235,5 +313,12 @@ const styles = StyleSheet.create({
   statBox: { flex: 1, alignItems: 'center', gap: spacing.xs },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flex: { flex: 1 },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  linkDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   actions: { marginTop: spacing.xxl, gap: spacing.sm },
 });

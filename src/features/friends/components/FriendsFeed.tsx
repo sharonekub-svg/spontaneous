@@ -5,12 +5,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar, Text } from '@/components';
 import type { FeedItem } from '@/features/friends/api';
+import { useModeration } from '@/features/moderation/useModeration';
 import { relativeTime } from '@/lib/format';
 import { colors, spacing } from '@/theme';
 
 /** Recent friend activity: who completed which mission, and when. */
 export function FriendsFeed({ items }: { items: FeedItem[] }) {
   const router = useRouter();
+  const { promptReport } = useModeration();
   return (
     <View style={styles.list}>
       {items.map((item) => (
@@ -32,6 +34,13 @@ export function FriendsFeed({ items }: { items: FeedItem[] }) {
             </Text>
           </View>
           <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+          <Pressable
+            onPress={() => promptReport('submission', item.submission_id)}
+            hitSlop={10}
+            accessibilityLabel="דיווח על פריט זה"
+          >
+            <Ionicons name="ellipsis-vertical" size={16} color={colors.textMuted} />
+          </Pressable>
         </Pressable>
       ))}
     </View>
