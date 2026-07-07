@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+import { identifyUser, resetAnalytics } from '@/lib/analytics';
 import { supabase } from '@/lib/supabase';
 import type { ProfileRow } from '@/types/database.types';
 
@@ -27,7 +28,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadProfile = useMemo(
     () => async (userId: string) => {
       const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      setProfile((data as ProfileRow | null) ?? null);
+      const row = (data as ProfileRow | null) ?? null;
+      setProfile(row);
+      if (row) {
+        identifyUser(userId, {
+          username: row.username,
+          level: row.level,
+          points: row.points,
+          current_streak: row.current_streak,
+        });
+      }
     },
     [],
   );
@@ -53,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setProfile(null);
         queryClient.clear();
+        resetAnalytics();
       }
     });
 

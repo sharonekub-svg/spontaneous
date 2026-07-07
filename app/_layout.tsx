@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ErrorBoundary, OfflineBanner, ToastProvider } from '@/components';
+import { AnalyticsProvider } from '@/features/analytics/AnalyticsProvider';
 import { AuthGate } from '@/features/auth/AuthGate';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { AuthProvider } from '@/features/auth/AuthProvider';
@@ -43,30 +44,32 @@ function RootLayout() {
           <ToastProvider>
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
-                <StatusBar style="light" />
-                <AuthGate>
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: colors.background },
-                      animation: 'slide_from_right',
-                    }}
-                  >
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="auth-callback" />
-                    <Stack.Screen name="onboarding" />
-                    <Stack.Screen name="mission/[id]" options={{ presentation: 'card' }} />
-                    <Stack.Screen
-                      name="notifications"
-                      options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-                    />
-                    <Stack.Screen name="profile/[username]" />
-                    <Stack.Screen name="group/[id]" />
-                    <Stack.Screen name="admin" />
-                  </Stack>
-                </AuthGate>
-                <OfflineBanner />
+                <AnalyticsProvider>
+                  <StatusBar style="light" />
+                  <AuthGate>
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        contentStyle: { backgroundColor: colors.background },
+                        animation: 'slide_from_right',
+                      }}
+                    >
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="auth-callback" />
+                      <Stack.Screen name="onboarding" />
+                      <Stack.Screen name="mission/[id]" options={{ presentation: 'card' }} />
+                      <Stack.Screen
+                        name="notifications"
+                        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+                      />
+                      <Stack.Screen name="profile/[username]" />
+                      <Stack.Screen name="group/[id]" />
+                      <Stack.Screen name="admin" />
+                    </Stack>
+                  </AuthGate>
+                  <OfflineBanner />
+                </AnalyticsProvider>
               </AuthProvider>
             </QueryClientProvider>
           </ToastProvider>
