@@ -38,6 +38,13 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="gallery"
+        options={{
+          title: 'גלריה',
+          tabBarIcon: ({ color, size }) => <Ionicons name="images" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="missions"
         options={{
           title: 'משימות',

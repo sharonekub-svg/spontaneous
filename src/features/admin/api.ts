@@ -36,6 +36,31 @@ export async function getReviewQueue(): Promise<ReviewItem[]> {
   return items;
 }
 
+/**
+ * All submissions that carry media proof (photo/video/voice), newest first,
+ * regardless of review status — a permanent gallery for admins. Signed URLs are
+ * resolved so the media is directly viewable.
+ */
+export async function getProofGallery(): Promise<ReviewItem[]> {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*, mission:missions(*), profile:profiles(id, username, display_name, avatar_url)')
+    .not('proof_url', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(80);
+  if (error) throw error;
+
+  const items = (data as ReviewItem[]) ?? [];
+  await Promise.all(
+    items.map(async (item) => {
+      if (item.proof_url && item.proof_type !== 'text') {
+        item.signedProofUrl = await getSignedUrl('proofs', item.proof_url);
+      }
+    }),
+  );
+  return items;
+}
+
 export async function approveSubmission(submissionId: string): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const { error } = await supabase.rpc('approve_submission', {

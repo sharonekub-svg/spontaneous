@@ -7,6 +7,7 @@ import {
   createMission,
   deleteMission,
   getAnalytics,
+  getProofGallery,
   getReviewQueue,
   grantXp,
   type MissionInput,
@@ -19,6 +20,10 @@ import {
 
 export function useReviewQueue() {
   return useQuery({ queryKey: queryKeys.reviewQueue, queryFn: getReviewQueue });
+}
+
+export function useProofGallery() {
+  return useQuery({ queryKey: ['admin', 'gallery'], queryFn: getProofGallery });
 }
 
 export function useReviewActions() {

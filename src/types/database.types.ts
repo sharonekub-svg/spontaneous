@@ -27,7 +27,8 @@ export type NotificationType =
   | 'badge_unlocked'
   | 'level_up'
   | 'friend_request'
-  | 'group_invite';
+  | 'group_invite'
+  | 'submission_pending';
 
 export interface ProfileRow {
   id: string;

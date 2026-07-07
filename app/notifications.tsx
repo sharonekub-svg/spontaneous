@@ -20,6 +20,7 @@ const ICONS: Record<NotificationType, { icon: keyof typeof Ionicons.glyphMap; co
   level_up: { icon: 'flash', color: colors.primary },
   friend_request: { icon: 'person-add', color: colors.primary },
   group_invite: { icon: 'people', color: colors.primary },
+  submission_pending: { icon: 'hourglass', color: colors.warning },
 };
 
 export default function NotificationsScreen() {

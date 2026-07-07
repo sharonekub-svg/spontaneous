@@ -12,18 +12,41 @@ import {
   Input,
   LoadingState,
   Screen,
+  SegmentedControl,
+  type Segment,
   Text,
 } from '@/components';
 import type { ReviewItem } from '@/features/admin/api';
 import { useReviewActions, useReviewQueue } from '@/features/admin/hooks';
-import { relativeTime } from '@/lib/format';
+import { difficultyMeta, relativeTime } from '@/lib/format';
 import { colors, radius, spacing } from '@/theme';
+import type { Difficulty } from '@/types/database.types';
 
 export default function ReviewQueueScreen() {
   const queue = useReviewQueue();
   const { approve, reject } = useReviewActions();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [reason, setReason] = useState('');
+  const [search, setSearch] = useState('');
+  const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all');
+
+  const difficultySegments: Segment<Difficulty | 'all'>[] = [
+    { value: 'all', label: 'הכול' },
+    { value: 'easy', label: difficultyMeta.easy.label },
+    { value: 'medium', label: difficultyMeta.medium.label },
+    { value: 'hard', label: difficultyMeta.hard.label },
+    { value: 'extreme', label: difficultyMeta.extreme.label },
+  ];
+
+  const items = (queue.data ?? []).filter((item) => {
+    if (difficulty !== 'all' && item.mission?.difficulty !== difficulty) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const name =
+      `${item.profile?.display_name ?? ''} ${item.profile?.username ?? ''}`.toLowerCase();
+    const title = (item.mission?.title ?? '').toLowerCase();
+    return name.includes(q) || title.includes(q);
+  });
 
   async function handleApprove(item: ReviewItem) {
     try {
@@ -69,89 +92,103 @@ export default function ReviewQueueScreen() {
       ) : (queue.data?.length ?? 0) === 0 ? (
         <EmptyState icon="checkmark-done" title="התור ריק" message="אין הגשות ממתינות." />
       ) : (
-        <View style={styles.list}>
-          {queue.data?.map((item) => (
-            <Card key={item.id} elevated style={styles.card}>
-              <View style={styles.userRow}>
-                <Avatar
-                  uri={item.profile?.avatar_url}
-                  name={item.profile?.display_name || item.profile?.username}
-                  size={36}
-                />
-                <View style={styles.flex}>
-                  <Text variant="subheading">
-                    {item.profile?.display_name || item.profile?.username || 'שחקן'}
-                  </Text>
-                  <Text variant="caption" color={colors.textMuted}>
-                    {relativeTime(item.created_at)}
-                  </Text>
-                </View>
-                {item.mission ? <DifficultyTag difficulty={item.mission.difficulty} /> : null}
-              </View>
+        <>
+          <View style={styles.filters}>
+            <Input placeholder="חיפוש לפי שם או משימה" value={search} onChangeText={setSearch} />
+            <SegmentedControl
+              segments={difficultySegments}
+              value={difficulty}
+              onChange={setDifficulty}
+            />
+          </View>
+          {items.length === 0 ? (
+            <EmptyState icon="search" title="אין תוצאות" message="נסו חיפוש או סינון אחר." />
+          ) : (
+            <View style={styles.list}>
+              {items.map((item) => (
+                <Card key={item.id} elevated style={styles.card}>
+                  <View style={styles.userRow}>
+                    <Avatar
+                      uri={item.profile?.avatar_url}
+                      name={item.profile?.display_name || item.profile?.username}
+                      size={36}
+                    />
+                    <View style={styles.flex}>
+                      <Text variant="subheading">
+                        {item.profile?.display_name || item.profile?.username || 'שחקן'}
+                      </Text>
+                      <Text variant="caption" color={colors.textMuted}>
+                        {relativeTime(item.created_at)}
+                      </Text>
+                    </View>
+                    {item.mission ? <DifficultyTag difficulty={item.mission.difficulty} /> : null}
+                  </View>
 
-              <Text variant="heading">{item.mission?.title ?? 'משימה'}</Text>
+                  <Text variant="heading">{item.mission?.title ?? 'משימה'}</Text>
 
-              {/* Proof */}
-              {item.proof_type === 'photo' && item.signedProofUrl ? (
-                <Image
-                  source={{ uri: item.signedProofUrl }}
-                  style={styles.proofImage}
-                  contentFit="cover"
-                />
-              ) : item.proof_type === 'video' && item.signedProofUrl ? (
-                <Video
-                  source={{ uri: item.signedProofUrl }}
-                  style={styles.proofImage}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                />
-              ) : item.proof_type === 'voice' && item.signedProofUrl ? (
-                <Video
-                  source={{ uri: item.signedProofUrl }}
-                  style={styles.voiceProof}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                />
-              ) : null}
-              {item.proof_text ? (
-                <View style={styles.textProof}>
-                  <Text variant="bodyMuted" color={colors.textSecondary}>
-                    “{item.proof_text}”
-                  </Text>
-                </View>
-              ) : null}
+                  {/* Proof */}
+                  {item.proof_type === 'photo' && item.signedProofUrl ? (
+                    <Image
+                      source={{ uri: item.signedProofUrl }}
+                      style={styles.proofImage}
+                      contentFit="cover"
+                    />
+                  ) : item.proof_type === 'video' && item.signedProofUrl ? (
+                    <Video
+                      source={{ uri: item.signedProofUrl }}
+                      style={styles.proofImage}
+                      useNativeControls
+                      resizeMode={ResizeMode.CONTAIN}
+                    />
+                  ) : item.proof_type === 'voice' && item.signedProofUrl ? (
+                    <Video
+                      source={{ uri: item.signedProofUrl }}
+                      style={styles.voiceProof}
+                      useNativeControls
+                      resizeMode={ResizeMode.CONTAIN}
+                    />
+                  ) : null}
+                  {item.proof_text ? (
+                    <View style={styles.textProof}>
+                      <Text variant="bodyMuted" color={colors.textSecondary}>
+                        “{item.proof_text}”
+                      </Text>
+                    </View>
+                  ) : null}
 
-              {rejectingId === item.id ? (
-                <Input
-                  label="סיבת הדחייה"
-                  placeholder="למה זה נדחה?"
-                  value={reason}
-                  onChangeText={setReason}
-                />
-              ) : null}
+                  {rejectingId === item.id ? (
+                    <Input
+                      label="סיבת הדחייה"
+                      placeholder="למה זה נדחה?"
+                      value={reason}
+                      onChangeText={setReason}
+                    />
+                  ) : null}
 
-              <View style={styles.actions}>
-                <View style={styles.flex}>
-                  <Button
-                    label="דחייה"
-                    variant="danger"
-                    onPress={() => handleReject(item)}
-                    loading={reject.isPending && rejectingId === item.id}
-                    fullWidth
-                  />
-                </View>
-                <View style={styles.flex}>
-                  <Button
-                    label="אישור"
-                    onPress={() => handleApprove(item)}
-                    loading={approve.isPending}
-                    fullWidth
-                  />
-                </View>
-              </View>
-            </Card>
-          ))}
-        </View>
+                  <View style={styles.actions}>
+                    <View style={styles.flex}>
+                      <Button
+                        label="דחייה"
+                        variant="danger"
+                        onPress={() => handleReject(item)}
+                        loading={reject.isPending && rejectingId === item.id}
+                        fullWidth
+                      />
+                    </View>
+                    <View style={styles.flex}>
+                      <Button
+                        label="אישור"
+                        onPress={() => handleApprove(item)}
+                        loading={approve.isPending}
+                        fullWidth
+                      />
+                    </View>
+                  </View>
+                </Card>
+              ))}
+            </View>
+          )}
+        </>
       )}
     </Screen>
   );
@@ -159,6 +196,7 @@ export default function ReviewQueueScreen() {
 
 const styles = StyleSheet.create({
   subtitle: { marginTop: spacing.xs, marginBottom: spacing.lg },
+  filters: { gap: spacing.sm, marginBottom: spacing.lg },
   list: { gap: spacing.lg },
   card: { gap: spacing.md },
   userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

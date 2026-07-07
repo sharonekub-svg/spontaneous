@@ -1,10 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { Avatar, Button, Card, LoadingState, Pill, Screen, Text, useToast } from '@/components';
+import {
+  Avatar,
+  Button,
+  Card,
+  Confetti,
+  LoadingState,
+  Pill,
+  Screen,
+  Text,
+  useToast,
+} from '@/components';
 import { deleteAccount } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { SUPPORT_EMAIL } from '@/features/legal/content';
@@ -29,6 +39,21 @@ export default function ProfileScreen() {
   const history = useMissionHistory(userId);
   const uploadAvatar = useUploadAvatar();
   const [deleting, setDeleting] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
+  const prevLevel = useRef<number | null>(null);
+
+  // Celebrate when the user's level goes up (e.g. after a mission is approved).
+  useEffect(() => {
+    if (!profile) return;
+    const prev = prevLevel.current;
+    prevLevel.current = profile.level;
+    if (prev !== null && profile.level > prev) {
+      setCelebrating(true);
+      toast.success(`עלית לרמה ${profile.level}! ⚡`);
+      const t = setTimeout(() => setCelebrating(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [profile, toast]);
 
   const earnedIds = useMemo(
     () => new Set((earned.data ?? []).map((e) => e.badge_id)),
@@ -85,6 +110,7 @@ export default function ProfileScreen() {
         <RefreshControl refreshing={false} onRefresh={refreshProfile} tintColor={colors.primary} />
       }
     >
+      {celebrating ? <Confetti count={30} /> : null}
       <View style={styles.head}>
         <Pressable onPress={changeAvatar}>
           <Avatar

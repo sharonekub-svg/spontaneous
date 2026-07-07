@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, Share, StyleSheet, View } from 'react-native';
 
 import {
+  Button,
   Card,
   Confetti,
   DifficultyTag,
@@ -149,6 +150,16 @@ export default function MissionDetailScreen() {
             <Text variant="bodyMuted" color={colors.textSecondary} center>
               הרווחת {submission.points_awarded} נקודות ו-{submission.xp_awarded} XP.
             </Text>
+            <Button
+              label="שיתוף ההישג"
+              variant="secondary"
+              onPress={() =>
+                Share.share({
+                  message: `השלמתי את «${mission.title}» בספונטני והרווחתי ${submission.points_awarded} נקודות! 🎯`,
+                }).catch(() => {})
+              }
+              icon={<Ionicons name="share-social" size={18} color={colors.textPrimary} />}
+            />
           </Card>
         ) : (
           <Card style={styles.statusCard}>
