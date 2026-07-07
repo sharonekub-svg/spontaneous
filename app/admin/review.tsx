@@ -1,3 +1,4 @@
+import { ResizeMode, Video } from 'expo-av';
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { Alert, RefreshControl, StyleSheet, View } from 'react-native';
@@ -10,7 +11,6 @@ import {
   EmptyState,
   Input,
   LoadingState,
-  Pill,
   Screen,
   Text,
 } from '@/components';
@@ -99,9 +99,19 @@ export default function ReviewQueueScreen() {
                   contentFit="cover"
                 />
               ) : item.proof_type === 'video' && item.signedProofUrl ? (
-                <Pill label="הוכחת וידאו מצורפת" color={colors.primary} />
+                <Video
+                  source={{ uri: item.signedProofUrl }}
+                  style={styles.proofImage}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                />
               ) : item.proof_type === 'voice' && item.signedProofUrl ? (
-                <Pill label="הוכחה קולית מצורפת" color={colors.primary} />
+                <Video
+                  source={{ uri: item.signedProofUrl }}
+                  style={styles.voiceProof}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                />
               ) : null}
               {item.proof_text ? (
                 <View style={styles.textProof}>
@@ -154,6 +164,7 @@ const styles = StyleSheet.create({
   userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flex: { flex: 1 },
   proofImage: { width: '100%', height: 240, borderRadius: radius.lg },
+  voiceProof: { width: '100%', height: 54, borderRadius: radius.lg },
   textProof: {
     backgroundColor: colors.surfaceElevated,
     borderRadius: radius.md,
