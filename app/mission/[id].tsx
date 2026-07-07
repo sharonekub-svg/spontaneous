@@ -18,7 +18,6 @@ import { ProofComposer, type ProofPayload } from '@/features/missions/components
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
-import { pointsForMood } from '@/lib/points';
 import type { MissionWithCategory } from '@/features/missions/api';
 import { colors, spacing } from '@/theme';
 
@@ -105,7 +104,7 @@ export default function MissionDetailScreen() {
         </Text>
         <View style={styles.rewardRow}>
           <Pill
-            label={`+${pointsForMood(state?.checkinMood)} נקודות`}
+            label={`+${mission.base_points} נקודות`}
             color={colors.reward}
             icon={<Ionicons name="cash" size={13} color={colors.reward} />}
           />
@@ -115,6 +114,11 @@ export default function MissionDetailScreen() {
             icon={<Ionicons name="flash" size={13} color={colors.primary} />}
           />
         </View>
+        {mission.points_rationale ? (
+          <Text variant="caption" color={colors.textMuted}>
+            {mission.points_rationale}
+          </Text>
+        ) : null}
       </Card>
 
       <View style={styles.section}>

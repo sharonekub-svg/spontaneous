@@ -84,6 +84,7 @@ export interface MissionRow {
   difficulty: Difficulty;
   base_points: number;
   xp_reward: number;
+  points_rationale: string;
   proof_types: ProofType[];
   min_mood: Mood;
   cooldown_hours: number;
