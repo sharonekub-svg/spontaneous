@@ -22,10 +22,10 @@ interface ProofComposerProps {
 }
 
 const PROOF_LABELS: Record<ProofType, { label: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  photo: { label: 'Photo', icon: 'camera' },
-  video: { label: 'Video', icon: 'videocam' },
-  voice: { label: 'Voice', icon: 'mic' },
-  text: { label: 'Write', icon: 'create' },
+  photo: { label: 'תמונה', icon: 'camera' },
+  video: { label: 'וידאו', icon: 'videocam' },
+  voice: { label: 'קול', icon: 'mic' },
+  text: { label: 'כתיבה', icon: 'create' },
 };
 
 /** Captures mission proof in the selected format and emits a ready-to-upload payload. */
@@ -35,10 +35,19 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
   const [media, setMedia] = useState<ProofPayload['media']>();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
-  async function pickMedia(kind: 'photo' | 'video') {
+  function applyAsset(kind: 'photo' | 'video', asset: ImagePicker.ImagePickerAsset) {
+    setMedia({
+      uri: asset.uri,
+      contentType: kind === 'photo' ? 'image/jpeg' : 'video/mp4',
+      extension: kind === 'photo' ? 'jpg' : 'mp4',
+    });
+  }
+
+  /** Capture fresh proof with the camera. */
+  async function captureMedia(kind: 'photo' | 'video') {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Camera needed', 'Allow camera access to capture proof.');
+      Alert.alert('נדרשת מצלמה', 'אפשרו גישה למצלמה כדי לצלם הוכחה.');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -46,21 +55,29 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
       quality: 0.7,
       videoMaxDuration: 60,
     });
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      setMedia({
-        uri: asset.uri,
-        contentType: kind === 'photo' ? 'image/jpeg' : 'video/mp4',
-        extension: kind === 'photo' ? 'jpg' : 'mp4',
-      });
+    if (!result.canceled && result.assets[0]) applyAsset(kind, result.assets[0]);
+  }
+
+  /** Pick existing proof from the photo library / gallery. */
+  async function pickFromLibrary(kind: 'photo' | 'video') {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('נדרשת גישה לגלריה', 'אפשרו גישה לתמונות כדי לצרף הוכחה מהגלריה.');
+      return;
     }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: kind === 'photo' ? ['images'] : ['videos'],
+      quality: 0.7,
+      videoMaxDuration: 60,
+    });
+    if (!result.canceled && result.assets[0]) applyAsset(kind, result.assets[0]);
   }
 
   async function startRecording() {
     try {
       const perm = await Audio.requestPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Microphone needed', 'Allow microphone access to record proof.');
+        Alert.alert('נדרש מיקרופון', 'אפשרו גישה למיקרופון כדי להקליט הוכחה.');
         return;
       }
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
@@ -69,7 +86,7 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
       );
       setRecording(rec);
     } catch {
-      Alert.alert('Recording failed', 'Could not start recording.');
+      Alert.alert('ההקלטה נכשלה', 'לא ניתן היה להתחיל הקלטה.');
     }
   }
 
@@ -86,14 +103,14 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
   function handleSubmit() {
     if (type === 'text') {
       if (text.trim().length < 10) {
-        Alert.alert('Tell us more', 'Write at least a sentence describing what you did.');
+        Alert.alert('ספרו לנו עוד', 'כתבו לפחות משפט על מה שעשיתם.');
         return;
       }
       onSubmit({ proofType: 'text', text: text.trim() });
       return;
     }
     if (!media) {
-      Alert.alert('Add your proof', 'Capture your proof before submitting.');
+      Alert.alert('הוסיפו הוכחה', 'צרפו הוכחה לפני השליחה.');
       return;
     }
     onSubmit({ proofType: type, media, text: text.trim() || undefined });
@@ -101,7 +118,7 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
 
   return (
     <View style={styles.wrap}>
-      <Text variant="subheading">Submit your proof</Text>
+      <Text variant="subheading">שליחת הוכחה</Text>
 
       <View style={styles.typeRow}>
         {allowed.map((t) => {
@@ -131,7 +148,7 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
 
       {type === 'text' ? (
         <Input
-          placeholder="Describe how you completed the quest…"
+          placeholder="תארו איך השלמתם את המשימה…"
           value={text}
           onChangeText={setText}
           multiline
@@ -144,12 +161,12 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
             <View style={styles.captured}>
               <Ionicons name="musical-notes" size={28} color={colors.success} />
               <Text variant="bodyMuted" color={colors.textSecondary}>
-                Recording ready
+                ההקלטה מוכנה
               </Text>
             </View>
           ) : (
             <Button
-              label={recording ? 'Stop recording' : 'Record voice proof'}
+              label={recording ? 'עצרו הקלטה' : 'הקליטו הוכחה קולית'}
               variant={recording ? 'danger' : 'secondary'}
               onPress={recording ? stopRecording : startRecording}
               icon={
@@ -167,32 +184,40 @@ export function ProofComposer({ allowed, submitting, onSubmit }: ProofComposerPr
               <View style={styles.captured}>
                 <Ionicons name="film" size={28} color={colors.success} />
                 <Text variant="bodyMuted" color={colors.textSecondary}>
-                  Video ready
+                  הווידאו מוכן
                 </Text>
               </View>
             )
           ) : (
-            <Button
-              label={`Capture ${type}`}
-              variant="secondary"
-              onPress={() => pickMedia(type as 'photo' | 'video')}
-              icon={
-                <Ionicons
-                  name={type === 'photo' ? 'camera' : 'videocam'}
-                  size={18}
-                  color={colors.textPrimary}
-                />
-              }
-            />
+            <>
+              <Button
+                label={type === 'photo' ? 'צלמו תמונה' : 'צלמו וידאו'}
+                variant="secondary"
+                onPress={() => captureMedia(type as 'photo' | 'video')}
+                icon={
+                  <Ionicons
+                    name={type === 'photo' ? 'camera' : 'videocam'}
+                    size={18}
+                    color={colors.textPrimary}
+                  />
+                }
+              />
+              <Button
+                label="בחרו מהגלריה"
+                variant="ghost"
+                onPress={() => pickFromLibrary(type as 'photo' | 'video')}
+                icon={<Ionicons name="images" size={18} color={colors.textSecondary} />}
+              />
+            </>
           )}
           {media ? (
-            <Button label="Retake" variant="ghost" onPress={() => setMedia(undefined)} />
+            <Button label="החליפו" variant="ghost" onPress={() => setMedia(undefined)} />
           ) : null}
         </View>
       )}
 
       <Button
-        label="Submit for review"
+        label="שליחה לבדיקה"
         onPress={handleSubmit}
         loading={submitting}
         fullWidth
