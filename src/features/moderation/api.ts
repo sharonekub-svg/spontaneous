@@ -13,7 +13,7 @@ export async function submitReport(params: {
 }): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const me = userData.user?.id;
-  if (!me) throw new Error('Not authenticated');
+  if (!me) throw new Error('לא מחוברים');
 
   const { error } = await supabase.from('reports').insert({
     reporter_id: me,

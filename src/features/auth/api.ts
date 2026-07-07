@@ -57,7 +57,7 @@ export async function signInWithGoogle() {
     options: { redirectTo, skipBrowserRedirect: true },
   });
   if (error) throw error;
-  if (!data.url) throw new Error('Could not start Google sign-in');
+  if (!data.url) throw new Error('לא ניתן היה להתחיל התחברות עם גוגל');
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
   if (result.type !== 'success') return;
@@ -73,7 +73,7 @@ export async function signInWithGoogle() {
 /** Apple sign-in (iOS only). Falls back to a clear error elsewhere. */
 export async function signInWithApple() {
   if (Platform.OS !== 'ios') {
-    throw new Error('Apple sign-in is only available on iOS devices.');
+    throw new Error('התחברות עם אפל זמינה רק במכשירי iOS.');
   }
   const credential = await AppleAuthentication.signInAsync({
     requestedScopes: [
@@ -81,7 +81,7 @@ export async function signInWithApple() {
       AppleAuthentication.AppleAuthenticationScope.EMAIL,
     ],
   });
-  if (!credential.identityToken) throw new Error('No identity token returned by Apple');
+  if (!credential.identityToken) throw new Error('אפל לא החזירה אסימון זהות');
 
   const { error } = await supabase.auth.signInWithIdToken({
     provider: 'apple',
@@ -124,7 +124,7 @@ async function emptyUserFolder(bucket: 'avatars' | 'proofs', userId: string) {
 export async function deleteAccount() {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
-  if (!userId) throw new Error('Not authenticated');
+  if (!userId) throw new Error('לא מחוברים');
 
   await emptyUserFolder('avatars', userId).catch(() => {});
   await emptyUserFolder('proofs', userId).catch(() => {});

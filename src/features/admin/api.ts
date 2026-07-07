@@ -99,7 +99,7 @@ export async function searchUsers(query: string): Promise<ProfileRow[]> {
 export async function setBanned(userId: string, banned: boolean, reason?: string): Promise<void> {
   const { error } = await supabase
     .from('profiles')
-    .update({ is_banned: banned, banned_reason: banned ? (reason ?? 'Violation of rules') : null })
+    .update({ is_banned: banned, banned_reason: banned ? (reason ?? 'הפרת כללים') : null })
     .eq('id', userId);
   if (error) throw error;
 }

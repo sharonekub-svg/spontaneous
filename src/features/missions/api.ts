@@ -76,7 +76,7 @@ export async function getTodayState(userId: string): Promise<TodayState> {
 export async function checkInAndAssign(mood: Mood): Promise<MissionAssignmentRow> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
-  if (!userId) throw new Error('Not authenticated');
+  if (!userId) throw new Error('לא מחוברים');
 
   const { data, error } = await supabase.rpc('assign_daily_mission', {
     target_user: userId,
@@ -97,7 +97,7 @@ interface SubmitProofInput {
 export async function submitProof(input: SubmitProofInput): Promise<SubmissionRow> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
-  if (!userId) throw new Error('Not authenticated');
+  if (!userId) throw new Error('לא מחוברים');
 
   let proofUrl: string | null = null;
   let proofHash: string | null = null;

@@ -52,7 +52,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       {children}
       {initializing ? (
         <View style={[StyleSheet.absoluteFill, styles.overlay]}>
-          <LoadingState label="Warming up…" />
+          <LoadingState label="רק רגע…" />
         </View>
       ) : null}
     </>

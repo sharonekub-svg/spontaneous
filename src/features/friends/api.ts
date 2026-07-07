@@ -75,15 +75,15 @@ export async function getFriendIds(userId: string): Promise<string[]> {
 export async function sendFriendRequest(addresseeUsername: string): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const me = userData.user?.id;
-  if (!me) throw new Error('Not authenticated');
+  if (!me) throw new Error('לא מחוברים');
 
   const { data: target } = await supabase
     .from('profiles')
     .select('id')
     .ilike('username', addresseeUsername)
     .maybeSingle();
-  if (!target) throw new Error('No user found with that username');
-  if ((target as { id: string }).id === me) throw new Error('You can’t add yourself');
+  if (!target) throw new Error('לא נמצא משתמש עם שם המשתמש הזה');
+  if ((target as { id: string }).id === me) throw new Error('אי אפשר להוסיף את עצמכם');
 
   const { error } = await supabase.from('friendships').insert({
     requester_id: me,

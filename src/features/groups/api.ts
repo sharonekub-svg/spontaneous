@@ -65,7 +65,7 @@ export async function joinGroupByCode(inviteCode: string): Promise<GroupRow> {
 export async function leaveGroup(groupId: string): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
   const me = userData.user?.id;
-  if (!me) throw new Error('Not authenticated');
+  if (!me) throw new Error('לא מחוברים');
   const { error } = await supabase
     .from('group_members')
     .delete()
