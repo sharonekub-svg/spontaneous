@@ -50,11 +50,13 @@ export default function GroupsScreen() {
   }
 
   function shareInvite(name: string, code: string) {
+    // The link carries the code: people who already use the app join instantly,
+    // new users land on the download page (and can enter the code manually).
     Share.share({
       message:
         `הצטרפו לקבוצה «${name}» ב${APP_NAME}! 🎯\n` +
         `קוד הזמנה: ${code}\n` +
-        `הורידו את האפליקציה כאן: ${APP_URL}`,
+        `פתחו את הקישור כדי להצטרף: ${APP_URL}?join=${code}`,
     }).catch(() => {});
   }
 
