@@ -4,9 +4,11 @@ import * as Haptics from 'expo-haptics';
 import React from 'react';
 import { Platform } from 'react-native';
 
+import { useAuth } from '@/features/auth/AuthProvider';
 import { colors } from '@/theme';
 
 export default function TabsLayout() {
+  const { isAdmin } = useAuth();
   return (
     <Tabs
       screenListeners={{
@@ -40,6 +42,8 @@ export default function TabsLayout() {
         options={{
           title: 'משימות',
           tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} />,
+          // The missions catalog is admin-only; hide the tab for everyone else.
+          href: isAdmin ? undefined : null,
         }}
       />
       <Tabs.Screen

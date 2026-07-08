@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -12,12 +12,14 @@ import {
   Text,
   type Segment,
 } from '@/components';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { MissionCard } from '@/features/missions/components/MissionCard';
 import { useCategories, useMissions } from '@/features/missions/hooks';
 import { colors, spacing } from '@/theme';
 
 export default function BrowseScreen() {
   const router = useRouter();
+  const { isAdmin } = useAuth();
   const [categoryId, setCategoryId] = useState<string>('all');
   const categories = useCategories();
   const missions = useMissions(categoryId === 'all' ? undefined : categoryId);
@@ -29,6 +31,9 @@ export default function BrowseScreen() {
     ],
     [categories.data],
   );
+
+  // The missions catalog is admin-only.
+  if (!isAdmin) return <Redirect href="/(tabs)" />;
 
   return (
     <Screen padded={false}>
