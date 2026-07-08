@@ -1,5 +1,13 @@
 # App Store Launch Checklist — Spontani (iOS)
 
+> **Update 2026-07-08:** All six 🔴 code-side blockers below are implemented and
+> **verified live in production** (`zceoswqrvcqmjjohpeyo`): account deletion,
+> report, block, terms + privacy, real EAS projectId, and difficulty-based
+> scoring. iPad support is now disabled (iPhone-only v1), and the prod migration
+> history was reconciled so `supabase db push` no longer re-runs the destructive
+> `replace_missions`. What remains is App Store Connect data entry — see
+> **`app-store-submission.md`** for pre-filled answers.
+
 Status as of 2026-07-06. Spontani is a login-gated social app with user-generated
 content (usernames, display names, avatars, free-text group names/descriptions,
 and photo/video/voice/text "proof"). That combination triggers Apple's strictest
