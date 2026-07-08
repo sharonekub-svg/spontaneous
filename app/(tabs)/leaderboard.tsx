@@ -19,14 +19,14 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { type LeaderboardScope } from '@/features/leaderboard/api';
 import { LeaderboardRow } from '@/features/leaderboard/components/LeaderboardRow';
 import { useLeaderboard } from '@/features/leaderboard/hooks';
+import { APP_URL } from '@/lib/appInfo';
 import { colors, radius, spacing } from '@/theme';
 
 const SCOPES: Segment<LeaderboardScope>[] = [
+  { value: 'all_time', label: 'כל הזמן' },
   { value: 'daily', label: 'יומי' },
   { value: 'weekly', label: 'שבועי' },
   { value: 'monthly', label: 'חודשי' },
-  { value: 'all_time', label: 'כל הזמן' },
-  { value: 'friends', label: 'חברים' },
 ];
 
 // Prefilled WhatsApp invite that doubles as an explanation of the leaderboard.
@@ -34,12 +34,12 @@ const INVITE_MESSAGE = [
   'היי! בוא נתחרה בספונטני — אפליקציה של משימות ספונטניות בחיים האמיתיים.',
   '',
   'איך הלידרבורד עובד:',
-  '• צוברים נקודות לפי כמה שאתה מעז: לא היום=10, קצת=25, די ספונטני=50, מטורף=100.',
+  '• כל משימה שווה נקודות לפי רמת הקושי: קלה=2, בינונית=5, קשה=10, קיצונית=20.',
   '• מי שאוסף הכי הרבה נקודות מוביל בצמרת.',
   '• למי שיש את הסטריק הכי גבוה (הכי הרבה ימים ברצף) נשאר למעלה.',
   '• הדירוג היומי/שבועי/חודשי מתאפס בכל תקופה — מתחילים מחדש כל שבוע.',
   '',
-  'מצטרפים כאן: https://sharonekub-svg.github.io/spontaneous/',
+  'מצטרפים כאן: ' + APP_URL,
   '',
   'בוא נראה מי מנצח!',
 ].join('\n');
@@ -58,7 +58,7 @@ export default function LeaderboardScreen() {
   const router = useRouter();
   const toast = useToast();
   const { session } = useAuth();
-  const [scope, setScope] = useState<LeaderboardScope>('weekly');
+  const [scope, setScope] = useState<LeaderboardScope>('all_time');
   const [explainOpen, setExplainOpen] = useState(false);
   const leaderboard = useLeaderboard(scope);
 
@@ -119,11 +119,7 @@ export default function LeaderboardScreen() {
         <EmptyState
           icon="trophy"
           title="אין דירוג עדיין"
-          message={
-            scope === 'friends'
-              ? 'הוסיפו חברים כדי לראות איך אתם מולם.'
-              : 'היו הראשונים לצבור נקודות בתקופה הזו!'
-          }
+          message="היו הראשונים לצבור נקודות בתקופה הזו!"
         />
       ) : (
         <FlashList

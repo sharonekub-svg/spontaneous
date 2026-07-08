@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import {
@@ -18,13 +18,9 @@ import {
 import { deleteAccount } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { SUPPORT_EMAIL } from '@/features/legal/content';
-import { useAllBadges } from '@/features/badges/hooks';
 import { useMissionHistory } from '@/features/missions/hooks';
-import { BadgeGrid } from '@/features/profile/components/BadgeGrid';
-import { LevelTags } from '@/features/profile/components/LevelTags';
-import { useProfileStats, useUploadAvatar, useUserBadges } from '@/features/profile/hooks';
+import { useProfileStats, useUploadAvatar } from '@/features/profile/hooks';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
-import { currentLevelTag } from '@/lib/levelTags';
 import { difficultyMeta, relativeTime } from '@/lib/format';
 import { colors, spacing } from '@/theme';
 
@@ -33,8 +29,6 @@ export default function ProfileScreen() {
   const toast = useToast();
   const { profile, isAdmin, signOut, refreshProfile, session } = useAuth();
   const userId = session?.user.id;
-  const badges = useAllBadges();
-  const earned = useUserBadges(userId);
   const stats = useProfileStats(userId);
   const history = useMissionHistory(userId);
   const uploadAvatar = useUploadAvatar();
@@ -54,11 +48,6 @@ export default function ProfileScreen() {
       return () => clearTimeout(t);
     }
   }, [profile, toast]);
-
-  const earnedIds = useMemo(
-    () => new Set((earned.data ?? []).map((e) => e.badge_id)),
-    [earned.data],
-  );
 
   async function changeAvatar() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -139,20 +128,6 @@ export default function ProfileScreen() {
       <Card elevated style={styles.headerCard}>
         <LevelHeader profile={profile} />
       </Card>
-
-      {/* Level tags */}
-      <Section title="תגים לפי רמה" trailing={currentLevelTag(profile.level)?.name ?? undefined}>
-        <LevelTags level={profile.level} />
-      </Section>
-
-      {/* Badges */}
-      <Section title="תגים" trailing={`${earnedIds.size}/${badges.data?.length ?? 0}`}>
-        {badges.isLoading ? (
-          <LoadingState />
-        ) : (
-          <BadgeGrid badges={badges.data ?? []} earnedIds={earnedIds} />
-        )}
-      </Section>
 
       {/* Stats */}
       <Section title="סטטיסטיקות">

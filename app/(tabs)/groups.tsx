@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, Share, StyleSheet, View } from 'react-native';
 
 import {
-  Avatar,
   Button,
   Card,
   EmptyState,
@@ -15,22 +14,18 @@ import {
   useToast,
 } from '@/components';
 import { useCreateGroup, useJoinGroup, useMyGroups } from '@/features/groups/hooks';
-import { useFriends, useRespondToRequest, useSendFriendRequest } from '@/features/friends/hooks';
+import { APP_NAME, APP_URL } from '@/lib/appInfo';
 import { colors, spacing } from '@/theme';
 
 export default function GroupsScreen() {
   const router = useRouter();
   const toast = useToast();
   const groups = useMyGroups();
-  const friends = useFriends();
   const createGroup = useCreateGroup();
   const joinGroup = useJoinGroup();
-  const sendRequest = useSendFriendRequest();
-  const respond = useRespondToRequest();
 
   const [groupName, setGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
-  const [friendName, setFriendName] = useState('');
 
   async function handleCreate() {
     if (groupName.trim().length < 2) return;
@@ -54,70 +49,21 @@ export default function GroupsScreen() {
     }
   }
 
-  async function handleAddFriend() {
-    if (!friendName.trim()) return;
-    try {
-      await sendRequest.mutateAsync(friendName.trim());
-      setFriendName('');
-      toast.success('הבקשה נשלחה', 'הם יופיעו ברגע שיאשרו.');
-    } catch (err) {
-      toast.error('לא ניתן לשלוח', err instanceof Error ? err.message : 'נסו שוב.');
-    }
+  function shareInvite(name: string, code: string) {
+    Share.share({
+      message:
+        `הצטרפו לקבוצה «${name}» ב${APP_NAME}! 🎯\n` +
+        `קוד הזמנה: ${code}\n` +
+        `הורידו את האפליקציה כאן: ${APP_URL}`,
+    }).catch(() => {});
   }
 
   return (
     <Screen scroll>
-      <Text variant="title">קבוצות וחברים</Text>
+      <Text variant="title">קבוצות</Text>
       <Text variant="bodyMuted" color={colors.textSecondary} style={styles.subtitle}>
         התחרו בטבלאות פרטיות עם אנשים שאתם מכירים.
       </Text>
-
-      {/* Friend requests */}
-      {(friends.data?.incoming.length ?? 0) > 0 ? (
-        <View style={styles.section}>
-          <Text variant="overline" color={colors.primary}>
-            בקשות חברות
-          </Text>
-          {friends.data?.incoming.map((req) => (
-            <Card key={req.friendship.id} style={styles.requestRow} padded>
-              <Avatar uri={req.profile.avatar_url} name={req.profile.display_name} size={40} />
-              <Text variant="subheading" style={styles.flex}>
-                {req.profile.display_name || req.profile.username}
-              </Text>
-              <Pressable
-                onPress={() => respond.mutate({ id: req.friendship.id, accept: true })}
-                style={styles.acceptBtn}
-              >
-                <Ionicons name="checkmark" size={20} color={colors.success} />
-              </Pressable>
-              <Pressable
-                onPress={() => respond.mutate({ id: req.friendship.id, accept: false })}
-                style={styles.declineBtn}
-              >
-                <Ionicons name="close" size={20} color={colors.danger} />
-              </Pressable>
-            </Card>
-          ))}
-        </View>
-      ) : null}
-
-      {/* Add friend */}
-      <View style={styles.section}>
-        <Text variant="overline" color={colors.textMuted}>
-          הוספת חבר
-        </Text>
-        <View style={styles.inlineForm}>
-          <View style={styles.flex}>
-            <Input
-              placeholder="שם המשתמש שלהם"
-              value={friendName}
-              onChangeText={setFriendName}
-              autoCapitalize="none"
-            />
-          </View>
-          <Button label="הוספה" onPress={handleAddFriend} loading={sendRequest.isPending} />
-        </View>
-      </View>
 
       {/* My groups */}
       <View style={styles.section}>
@@ -148,7 +94,14 @@ export default function GroupsScreen() {
                   {group.memberCount} חברים · קוד {group.invite_code}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              <Pressable
+                onPress={() => shareInvite(group.name, group.invite_code)}
+                hitSlop={10}
+                style={styles.shareBtn}
+                accessibilityLabel="שיתוף הזמנה"
+              >
+                <Ionicons name="share-social" size={20} color={colors.primary} />
+              </Pressable>
             </Card>
           ))
         )}
@@ -196,29 +149,20 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   inlineForm: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
   joinLabel: { marginTop: spacing.md },
-  requestRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  acceptBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: `${colors.success}22`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  declineBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: `${colors.danger}22`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   groupRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   groupIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: `${colors.primary}22`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shareBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: `${colors.primary}18`,
     alignItems: 'center',
     justifyContent: 'center',
   },
