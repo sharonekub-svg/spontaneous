@@ -21,10 +21,10 @@ import { colors, spacing } from '@/theme';
 import type { Difficulty, MissionRow } from '@/types/database.types';
 
 const DIFFICULTY_DEFAULTS: Record<Difficulty, { points: number; xp: number }> = {
-  easy: { points: 10, xp: 10 },
-  medium: { points: 25, xp: 25 },
-  hard: { points: 60, xp: 60 },
-  extreme: { points: 120, xp: 120 },
+  easy: { points: 2, xp: 10 },
+  medium: { points: 5, xp: 20 },
+  hard: { points: 10, xp: 40 },
+  extreme: { points: 20, xp: 80 },
 };
 
 const difficultySegments: Segment<Difficulty>[] = [

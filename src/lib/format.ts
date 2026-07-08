@@ -1,17 +1,17 @@
 import type { Difficulty, Mood } from '@/types/database.types';
 
 export const moodMeta: Record<Mood, { label: string; emoji: string; blurb: string }> = {
-  not_today: { label: 'לא היום', emoji: '', blurb: 'נשמור על קליל ועדין. (10 נקודות)' },
-  a_little: { label: 'קצת', emoji: '', blurb: 'דחיפה קטנה החוצה. (25 נקודות)' },
+  not_today: { label: 'לא היום', emoji: '', blurb: 'נשמור על קליל ועדין — משימה קלה (2 נק׳).' },
+  a_little: { label: 'קצת', emoji: '', blurb: 'דחיפה קטנה החוצה — משימה בינונית (5 נק׳).' },
   pretty_spontaneous: {
     label: 'די ספונטני',
     emoji: '',
-    blurb: 'מביא אתגר אמיתי. (50 נקודות)',
+    blurb: 'אתגר אמיתי — משימה קשה (10 נק׳).',
   },
   crazy: {
     label: 'תנו לי משהו מטורף',
     emoji: '',
-    blurb: 'בלי גבולות. הולכים על גדול. (100 נקודות)',
+    blurb: 'בלי גבולות — משימה קיצונית (20 נק׳).',
   },
 };
 

@@ -23,7 +23,6 @@ import { useNotifications } from '@/features/notifications/hooks';
 import { LevelHeader } from '@/features/profile/components/LevelHeader';
 import { RewardBurst } from '@/features/missions/components/RewardBurst';
 import { colors, spacing } from '@/theme';
-import { pointsForMood } from '@/lib/points';
 import type { Mood } from '@/types/database.types';
 
 export default function HomeScreen() {
@@ -149,7 +148,7 @@ function ActiveMission({
 
         <View style={styles.rewardRow}>
           <Pill
-            label={`+${pointsForMood(state.checkinMood)} נקודות`}
+            label={`+${mission.base_points} נקודות`}
             color={colors.reward}
             icon={<Ionicons name="cash" size={13} color={colors.reward} />}
           />
@@ -162,7 +161,7 @@ function ActiveMission({
 
         {approved ? (
           <View style={styles.approvedBox}>
-            <RewardBurst points={pointsForMood(state.checkinMood)} xp={mission.xp_reward} />
+            <RewardBurst points={mission.base_points} xp={mission.xp_reward} />
             <View style={[styles.statusBox, { backgroundColor: `${colors.success}1A` }]}>
               <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text variant="subheading" color={colors.success}>

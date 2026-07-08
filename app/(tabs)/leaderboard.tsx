@@ -85,8 +85,8 @@ export default function LeaderboardScreen() {
         {explainOpen ? (
           <View style={styles.infoBody}>
             <Text variant="bodyMuted" color={colors.textSecondary}>
-              הנקודות נצברות לפי הרמה הספונטנית שבחרת בצ׳ק-אין: לא היום = 10, קצת = 25, די ספונטני =
-              50, מטורף = 100. ככל שתעז יותר — תרוויח יותר.
+              כל משימה שווה נקודות לפי רמת הקושי: קלה = 2, בינונית = 5, קשה = 10, קיצונית = 20. ככל
+              שתעזו יותר — תרוויחו יותר.
             </Text>
             <Text variant="bodyMuted" color={colors.textSecondary}>
               מי שאוסף הכי הרבה נקודות מוביל בצמרת, ולמי שיש את הסטריק הכי גבוה נשאר למעלה. הדירוג
