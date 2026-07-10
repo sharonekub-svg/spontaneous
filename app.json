@@ -52,7 +52,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Spontani needs access to your photos so you can attach proof of completed side quests."
+          "photosPermission": "Spontani needs access to your photos so you can attach proof of completed side quests.",
+          "cameraPermission": "Spontani needs your camera so you can capture photo and video proof of completed side quests.",
+          "microphonePermission": "Spontani needs your microphone so you can record voice and video proof of completed side quests."
         }
       ],
       [
