@@ -5,12 +5,14 @@ import React from 'react';
 import { Platform } from 'react-native';
 
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useFriendInviteLink } from '@/features/friends/useFriendInviteLink';
 import { useJoinFromLink } from '@/features/groups/useJoinFromLink';
 import { colors } from '@/theme';
 
 export default function TabsLayout() {
   const { isAdmin } = useAuth();
   useJoinFromLink();
+  useFriendInviteLink();
   return (
     <Tabs
       screenListeners={{

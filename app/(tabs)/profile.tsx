@@ -129,6 +129,15 @@ export default function ProfileScreen() {
         <LevelHeader profile={profile} />
       </Card>
 
+      <Button
+        label="חברים"
+        variant="secondary"
+        fullWidth
+        onPress={() => router.push('/friends')}
+        icon={<Ionicons name="people" size={18} color={colors.textPrimary} />}
+        style={styles.friendsBtn}
+      />
+
       {/* Stats */}
       <Section title="סטטיסטיקות">
         <View style={styles.statsGrid}>
@@ -308,6 +317,7 @@ const styles = StyleSheet.create({
     borderColor: colors.background,
   },
   headerCard: { marginTop: spacing.lg },
+  friendsBtn: { marginTop: spacing.md },
   section: { marginTop: spacing.xl, gap: spacing.md },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   statsGrid: { flexDirection: 'row', gap: spacing.md },

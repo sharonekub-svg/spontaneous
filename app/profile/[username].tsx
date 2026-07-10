@@ -4,9 +4,20 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
-import { Avatar, Card, ErrorState, LoadingState, Pill, Screen, Text } from '@/components';
+import {
+  Avatar,
+  Button,
+  Card,
+  ErrorState,
+  LoadingState,
+  Pill,
+  Screen,
+  Text,
+  useToast,
+} from '@/components';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useAllBadges } from '@/features/badges/hooks';
+import { useSendFriendRequest } from '@/features/friends/hooks';
 import { useIsBlocked } from '@/features/moderation/hooks';
 import { useModeration } from '@/features/moderation/useModeration';
 import { getProfileByUsername, getUserBadges } from '@/features/profile/api';
@@ -20,7 +31,9 @@ export default function PublicProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
   const router = useRouter();
   const { session } = useAuth();
+  const toast = useToast();
   const { promptReport, promptBlock, promptUnblock } = useModeration();
+  const sendRequest = useSendFriendRequest();
   const badges = useAllBadges();
 
   const profileQuery = useQuery({
@@ -43,6 +56,17 @@ export default function PublicProfileScreen() {
   const targetId = profileQuery.data?.id;
   const isOther = Boolean(targetId && targetId !== session?.user.id);
   const blocked = useIsBlocked(isOther ? targetId : undefined);
+
+  async function addFriend() {
+    const name = profileQuery.data?.username;
+    if (!name) return;
+    try {
+      await sendRequest.mutateAsync(name);
+      toast.success('בקשת החברות נשלחה!', `שלחת בקשה ל-@${name}.`);
+    } catch (err) {
+      toast.error('לא ניתן לשלוח בקשה', err instanceof Error ? err.message : 'נסו שוב.');
+    }
+  }
 
   function openModerationMenu() {
     if (!targetId) return;
@@ -125,6 +149,23 @@ export default function PublicProfileScreen() {
             icon={<Ionicons name="flame" size={13} color={colors.warning} />}
           />
         ) : null}
+        {isOther && !blocked.data ? (
+          <Button
+            label="הוספה כחבר"
+            variant="secondary"
+            onPress={addFriend}
+            loading={sendRequest.isPending}
+            icon={<Ionicons name="person-add" size={18} color={colors.textPrimary} />}
+            style={styles.addFriendBtn}
+          />
+        ) : null}
+      </View>
+
+      {/* All-time stats — public counters on the profile. */}
+      <View style={styles.statsRow}>
+        <StatBox label="משימות" value={profile.missions_completed} />
+        <StatBox label="רצף נוכחי" value={profile.current_streak} />
+        <StatBox label="הרצף הטוב" value={profile.longest_streak} />
       </View>
 
       <Card elevated style={styles.headerCard}>
@@ -151,6 +192,17 @@ export default function PublicProfileScreen() {
   );
 }
 
+function StatBox({ label, value }: { label: string; value: string | number }) {
+  return (
+    <Card style={styles.statBox}>
+      <Text variant="title">{value}</Text>
+      <Text variant="caption" color={colors.textMuted} center>
+        {label}
+      </Text>
+    </Card>
+  );
+}
+
 const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
@@ -161,6 +213,9 @@ const styles = StyleSheet.create({
   back: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   blockedBanner: { marginBottom: spacing.md },
   head: { alignItems: 'center', gap: spacing.xs },
+  addFriendBtn: { marginTop: spacing.sm },
+  statsRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
+  statBox: { flex: 1, alignItems: 'center', gap: spacing.xs },
   headerCard: { marginTop: spacing.lg },
   section: { marginTop: spacing.xl, gap: spacing.md },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

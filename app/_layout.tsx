@@ -62,6 +62,7 @@ function RootLayout() {
                       options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
                     />
                     <Stack.Screen name="profile/[username]" />
+                    <Stack.Screen name="friends" />
                     <Stack.Screen name="group/[id]" />
                     <Stack.Screen name="legal/terms" />
                     <Stack.Screen name="legal/privacy" />

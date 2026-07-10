@@ -73,16 +73,25 @@ export default function HomeScreen() {
           </Text>
           <Text variant="title">{profile.display_name || profile.username}</Text>
         </View>
-        <Pressable onPress={() => router.push('/notifications')} style={styles.bell}>
-          <Ionicons name="notifications" size={22} color={colors.textPrimary} />
-          {unread > 0 ? (
-            <View style={styles.badge}>
-              <Text variant="caption" color={colors.textPrimary} style={styles.badgeText}>
-                {unread > 9 ? '9+' : unread}
-              </Text>
-            </View>
-          ) : null}
-        </Pressable>
+        <View style={styles.topActions}>
+          <Pressable
+            onPress={() => router.push('/friends')}
+            style={styles.bell}
+            accessibilityLabel="חברים"
+          >
+            <Ionicons name="people" size={22} color={colors.textPrimary} />
+          </Pressable>
+          <Pressable onPress={() => router.push('/notifications')} style={styles.bell}>
+            <Ionicons name="notifications" size={22} color={colors.textPrimary} />
+            {unread > 0 ? (
+              <View style={styles.badge}>
+                <Text variant="caption" color={colors.textPrimary} style={styles.badgeText}>
+                  {unread > 9 ? '9+' : unread}
+                </Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.headerCard}>
@@ -203,6 +212,7 @@ function getGreeting(): string {
 
 const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  topActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   bell: {
     width: 44,
     height: 44,
