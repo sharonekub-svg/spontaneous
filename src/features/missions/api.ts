@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { uploadToBucket } from '@/lib/storage';
+import { getSignedUrl, uploadToBucket } from '@/lib/storage';
 import type {
   MissionAssignmentRow,
   MissionCategoryRow,
@@ -158,4 +158,33 @@ export async function getMissionHistory(
     .limit(100);
   if (error) throw error;
   return (data as (SubmissionRow & { mission: MissionRow | null })[]) ?? [];
+}
+
+export interface GalleryItem extends SubmissionRow {
+  mission: MissionRow | null;
+  signedProofUrl: string | null;
+}
+
+/**
+ * The signed-in user's personal gallery: every proof they submitted, newest
+ * first, with a short-lived signed URL for the private media. RLS
+ * (`submissions self read`) and the per-user proofs bucket guarantee this is
+ * visible only to the owner.
+ */
+export async function getMyGallery(userId: string): Promise<GalleryItem[]> {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*, mission:missions(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) throw error;
+
+  const rows = (data as (SubmissionRow & { mission: MissionRow | null })[]) ?? [];
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      signedProofUrl: row.proof_url ? await getSignedUrl('proofs', row.proof_url) : null,
+    })),
+  );
 }

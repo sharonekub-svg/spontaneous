@@ -58,12 +58,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="groups"
+        name="gallery"
         options={{
-          title: 'קבוצות',
-          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          title: 'גלריה',
+          tabBarIcon: ({ color, size }) => <Ionicons name="images" size={size} color={color} />,
         }}
       />
+      {/* Groups are retired from the user-facing app; the route stays for
+          invite links but is hidden from the tab bar. */}
+      <Tabs.Screen name="groups" options={{ href: null }} />
       <Tabs.Screen
         name="profile"
         options={{

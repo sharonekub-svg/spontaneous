@@ -7,6 +7,7 @@ import type { Mood } from '@/types/database.types';
 import {
   checkInAndAssign,
   getMissionHistory,
+  getMyGallery,
   getTodayState,
   listCategories,
   listMissions,
@@ -59,6 +60,16 @@ export function useMissionHistory(userId?: string) {
   return useQuery({
     queryKey: queryKeys.submissions(userId),
     queryFn: () => getMissionHistory(userId as string),
+    enabled: Boolean(userId),
+  });
+}
+
+export function useMyGallery() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  return useQuery({
+    queryKey: [...queryKeys.submissions(userId), 'gallery'],
+    queryFn: () => getMyGallery(userId as string),
     enabled: Boolean(userId),
   });
 }
