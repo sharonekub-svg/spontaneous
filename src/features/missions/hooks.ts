@@ -40,7 +40,10 @@ export function useSubmitProof() {
     mutationFn: submitProof,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.todayMission });
-      queryClient.invalidateQueries({ queryKey: queryKeys.submissions() });
+      // Broad prefix so the history and the personal gallery both refresh.
+      queryClient.invalidateQueries({ queryKey: ['submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 }

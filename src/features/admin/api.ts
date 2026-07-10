@@ -80,6 +80,18 @@ export async function rejectSubmission(submissionId: string, reason: string): Pr
   if (error) throw error;
 }
 
+/**
+ * The admin "double-check": reverse an already-approved submission that turned
+ * out to be fake. Removes the awarded points/XP and rolls the streak back.
+ */
+export async function revokeSubmission(submissionId: string, reason: string): Promise<void> {
+  const { error } = await supabase.rpc('revoke_submission', {
+    submission: submissionId,
+    reason,
+  });
+  if (error) throw error;
+}
+
 // --- Mission management ---------------------------------------------------
 
 export interface MissionInput {

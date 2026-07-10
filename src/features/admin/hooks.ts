@@ -13,6 +13,7 @@ import {
   type MissionInput,
   rejectSubmission,
   resetStreak,
+  revokeSubmission,
   searchUsers,
   setBanned,
   updateMission,
@@ -31,13 +32,18 @@ export function useReviewActions() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
     queryClient.invalidateQueries({ queryKey: queryKeys.adminAnalytics });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'gallery'] });
   };
   const approve = useMutation({ mutationFn: approveSubmission, onSuccess: invalidate });
   const reject = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => rejectSubmission(id, reason),
     onSuccess: invalidate,
   });
-  return { approve, reject };
+  const revoke = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => revokeSubmission(id, reason),
+    onSuccess: invalidate,
+  });
+  return { approve, reject, revoke };
 }
 
 export function useAnalytics() {

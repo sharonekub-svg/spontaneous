@@ -29,9 +29,11 @@ export default function MissionDetailScreen() {
   const router = useRouter();
   const today = useTodayState();
   const submitProof = useSubmitProof();
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const [justSubmitted, setJustSubmitted] = useState(false);
-  const [celebration, setCelebration] = useState<{ photoUri?: string } | null>(null);
+  const [celebration, setCelebration] = useState<{ photoUri?: string; fromStreak: number } | null>(
+    null,
+  );
 
   const missionQuery = useQuery({
     queryKey: queryKeys.mission(id ?? ''),
@@ -79,16 +81,20 @@ export default function MissionDetailScreen() {
         text: payload.text,
         media: payload.media,
       });
+      // Proof is approved instantly on the server; celebrate the streak that
+      // just went up (frozen here so a mid-animation profile refresh can't
+      // shift the numbers), then refresh the profile in the background.
       setJustSubmitted(true);
-      setCelebration({ photoUri: payload.media?.uri });
+      setCelebration({ photoUri: payload.media?.uri, fromStreak: profile?.current_streak ?? 0 });
+      refreshProfile().catch(() => {});
     } catch (err) {
       Alert.alert('השליחה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
 
-  const currentStreak = profile?.current_streak ?? 0;
-
-  const showPending = justSubmitted || submission?.status === 'pending';
+  const justApproved = justSubmitted || (isTodaysMission && submission?.status === 'approved');
+  const pointsAwarded = submission?.points_awarded ?? mission.base_points;
+  const xpAwarded = submission?.xp_awarded ?? mission.xp_reward;
 
   return (
     <Screen scroll gradient>
@@ -130,16 +136,29 @@ export default function MissionDetailScreen() {
       </Card>
 
       <View style={styles.section}>
-        {showPending ? (
+        {justApproved ? (
           <Card style={styles.statusCard}>
-            <Confetti count={18} />
-            <Ionicons name="hourglass" size={36} color={colors.warning} />
+            <Confetti />
+            <Ionicons name="checkmark-circle" size={36} color={colors.success} />
             <Text variant="heading" center>
-              ההוכחה נשלחה!
+              המשימה הושלמה! 🎉
             </Text>
             <Text variant="bodyMuted" color={colors.textSecondary} center>
-              מנהל יבדוק אותה בקרוב. תקבלו התראה ברגע שהיא תאושר.
+              הרווחת {pointsAwarded} נקודות ו-{xpAwarded} XP.
             </Text>
+            <Text variant="caption" color={colors.textMuted} center>
+              ההוכחה עוברת בדיקה חוזרת — במקרה נדיר היא עשויה להתבטל.
+            </Text>
+            <Button
+              label="שיתוף ההישג"
+              variant="secondary"
+              onPress={() =>
+                Share.share({
+                  message: `השלמתי את «${mission.title}» בספונטני והרווחתי ${pointsAwarded} נקודות! 🎯`,
+                }).catch(() => {})
+              }
+              icon={<Ionicons name="share-social" size={18} color={colors.textPrimary} />}
+            />
           </Card>
         ) : canSubmit ? (
           <ProofComposer
@@ -147,27 +166,6 @@ export default function MissionDetailScreen() {
             submitting={submitProof.isPending}
             onSubmit={handleSubmit}
           />
-        ) : isTodaysMission && submission?.status === 'approved' ? (
-          <Card style={styles.statusCard}>
-            <Confetti />
-            <Ionicons name="checkmark-circle" size={36} color={colors.success} />
-            <Text variant="heading" center>
-              המשימה הושלמה!
-            </Text>
-            <Text variant="bodyMuted" color={colors.textSecondary} center>
-              הרווחת {submission.points_awarded} נקודות ו-{submission.xp_awarded} XP.
-            </Text>
-            <Button
-              label="שיתוף ההישג"
-              variant="secondary"
-              onPress={() =>
-                Share.share({
-                  message: `השלמתי את «${mission.title}» בספונטני והרווחתי ${submission.points_awarded} נקודות! 🎯`,
-                }).catch(() => {})
-              }
-              icon={<Ionicons name="share-social" size={18} color={colors.textPrimary} />}
-            />
-          </Card>
         ) : (
           <Card style={styles.statusCard}>
             <Ionicons name="lock-closed" size={32} color={colors.textMuted} />
@@ -184,8 +182,8 @@ export default function MissionDetailScreen() {
       <StreakCelebration
         visible={celebration !== null}
         photoUri={celebration?.photoUri}
-        fromStreak={currentStreak}
-        toStreak={currentStreak + 1}
+        fromStreak={celebration?.fromStreak ?? 0}
+        toStreak={(celebration?.fromStreak ?? 0) + 1}
         onDone={() => setCelebration(null)}
       />
     </Screen>
