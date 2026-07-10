@@ -16,6 +16,7 @@ import {
 } from '@/components';
 import { useSubmitProof, useTodayState } from '@/features/missions/hooks';
 import { ProofComposer, type ProofPayload } from '@/features/missions/components/ProofComposer';
+import { SubmittedBurst } from '@/features/missions/components/SubmittedBurst';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
@@ -125,14 +126,8 @@ export default function MissionDetailScreen() {
       <View style={styles.section}>
         {showPending ? (
           <Card style={styles.statusCard}>
-            <Confetti count={18} />
-            <Ionicons name="hourglass" size={36} color={colors.warning} />
-            <Text variant="heading" center>
-              ההוכחה נשלחה!
-            </Text>
-            <Text variant="bodyMuted" color={colors.textSecondary} center>
-              מנהל יבדוק אותה בקרוב. תקבלו התראה ברגע שהיא תאושר.
-            </Text>
+            <Confetti count={28} />
+            <SubmittedBurst points={mission.base_points} xp={mission.xp_reward} />
           </Card>
         ) : canSubmit ? (
           <ProofComposer
