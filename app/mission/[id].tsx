@@ -16,6 +16,8 @@ import {
 } from '@/components';
 import { useSubmitProof, useTodayState } from '@/features/missions/hooks';
 import { ProofComposer, type ProofPayload } from '@/features/missions/components/ProofComposer';
+import { StreakCelebration } from '@/features/missions/components/StreakCelebration';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
@@ -27,7 +29,9 @@ export default function MissionDetailScreen() {
   const router = useRouter();
   const today = useTodayState();
   const submitProof = useSubmitProof();
+  const { profile } = useAuth();
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [celebration, setCelebration] = useState<{ photoUri?: string } | null>(null);
 
   const missionQuery = useQuery({
     queryKey: queryKeys.mission(id ?? ''),
@@ -76,10 +80,13 @@ export default function MissionDetailScreen() {
         media: payload.media,
       });
       setJustSubmitted(true);
+      setCelebration({ photoUri: payload.media?.uri });
     } catch (err) {
       Alert.alert('השליחה נכשלה', err instanceof Error ? err.message : 'נסו שוב.');
     }
   }
+
+  const currentStreak = profile?.current_streak ?? 0;
 
   const showPending = justSubmitted || submission?.status === 'pending';
 
@@ -173,6 +180,14 @@ export default function MissionDetailScreen() {
           </Card>
         )}
       </View>
+
+      <StreakCelebration
+        visible={celebration !== null}
+        photoUri={celebration?.photoUri}
+        fromStreak={currentStreak}
+        toStreak={currentStreak + 1}
+        onDone={() => setCelebration(null)}
+      />
     </Screen>
   );
 }
