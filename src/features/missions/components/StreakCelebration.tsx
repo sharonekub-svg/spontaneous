@@ -93,6 +93,16 @@ export function StreakCelebration({
           end={{ x: 0, y: 1 }}
         />
 
+        {/* The streak reveal turns the whole screen a warm Duolingo orange. */}
+        {step === 'streak' ? (
+          <LinearGradient
+            colors={[palette.amber400, palette.amber500, palette.coral500]}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0.2, y: 0 }}
+            end={{ x: 0.8, y: 1 }}
+          />
+        ) : null}
+
         {/* Step progress dots (hidden on the final streak reveal). */}
         {step !== 'streak' ? (
           <View style={styles.dots}>
@@ -295,6 +305,36 @@ function useCountUp(from: number, to: number, duration = 900): number {
   return value;
 }
 
+/** Slowly rotating sunburst behind the flame — the signature Duolingo touch. */
+function SunburstRays() {
+  const spin = useSharedValue(0);
+  const grow = useSharedValue(0.5);
+
+  useEffect(() => {
+    spin.value = withRepeat(withTiming(1, { duration: 22000, easing: Easing.linear }), -1, false);
+    grow.value = withSpring(1, { damping: 12, stiffness: 80 });
+  }, [spin, grow]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${spin.value * 360}deg` }, { scale: grow.value }],
+    opacity: grow.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.rays, style]} pointerEvents="none">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.ray,
+            { opacity: i % 2 === 0 ? 0.14 : 0.06, transform: [{ rotate: `${i * 15}deg` }] },
+          ]}
+        />
+      ))}
+    </Animated.View>
+  );
+}
+
 function StreakStep({
   from,
   to,
@@ -306,40 +346,34 @@ function StreakStep({
 }) {
   const count = useCountUp(from, to, 1100);
 
-  // Big flame: pop in, then a gentle continuous flicker.
-  const scale = useSharedValue(0.2);
-  const glow = useSharedValue(0.6);
+  // Big flame: bounce in with overshoot, then a gentle continuous flicker.
+  const scale = useSharedValue(0);
   const flicker = useSharedValue(1);
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     scale.value = withSequence(
-      withSpring(1.25, { damping: 8, stiffness: 140 }),
-      withSpring(1, { damping: 10, stiffness: 160 }),
+      withSpring(1.2, { damping: 7, stiffness: 130 }),
+      withSpring(1, { damping: 11, stiffness: 160 }),
     );
-    glow.value = withTiming(1, { duration: 500 });
     flicker.value = withRepeat(
       withSequence(
-        withTiming(1.06, { duration: 700, easing: Easing.inOut(Easing.quad) }),
-        withTiming(0.96, { duration: 700, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1.05, { duration: 650, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0.97, { duration: 650, easing: Easing.inOut(Easing.quad) }),
       ),
       -1,
       true,
     );
-    // Kick a little haptic when the count finishes climbing.
+    // A heavier haptic lands right as the count finishes climbing — the "wow".
     const t = setTimeout(
       () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {}),
       1100,
     );
     return () => clearTimeout(t);
-  }, [scale, glow, flicker]);
+  }, [scale, flicker]);
 
   const flameStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value * flicker.value }],
-  }));
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.35 * glow.value,
-    transform: [{ scale: 0.9 + 0.3 * flicker.value }],
   }));
 
   // Rolling window of up to 5 days ending on the new streak.
@@ -350,30 +384,28 @@ function StreakStep({
 
   return (
     <View style={styles.step}>
-      <Confetti count={28} />
+      <Confetti count={32} />
 
       <View style={styles.flameWrap}>
-        <Animated.View style={[styles.flameGlow, glowStyle]} />
+        <SunburstRays />
         <Animated.View style={flameStyle}>
-          <Ionicons name="flame" size={140} color={palette.amber400} />
+          <Ionicons name="flame" size={150} color={palette.white} />
         </Animated.View>
-        <View style={styles.flameCount} pointerEvents="none">
-          <Text variant="display" color={palette.ink900} style={styles.flameNumber}>
-            {count}
-          </Text>
-        </View>
       </View>
 
-      <Text variant="title" color={palette.amber400} center>
-        רצף של {to} {to === 1 ? 'יום' : 'ימים'}!
+      <Text color={palette.white} style={styles.streakNumber} center>
+        {count}
       </Text>
-      <Text variant="bodyMuted" color={colors.textSecondary} center>
+      <Text variant="title" color={palette.white} center>
+        {to === 1 ? 'יום ברצף!' : 'ימים ברצף!'}
+      </Text>
+      <Text variant="body" color={palette.white} center style={styles.streakSub}>
         חזרו מחר כדי לשמור על האש בוערת. 🔥
       </Text>
 
       <View style={styles.daysRow}>
-        {days.map((d) => (
-          <DayChip key={d} day={d} isToday={d === to} />
+        {days.map((d, i) => (
+          <DayChip key={d} day={d} isToday={d === to} delay={400 + i * 130} />
         ))}
       </View>
 
@@ -382,31 +414,25 @@ function StreakStep({
   );
 }
 
-/** A single day marker in the streak row; today ignites with a delay. */
-function DayChip({ day, isToday }: { day: number; isToday: boolean }) {
-  const pop = useSharedValue(isToday ? 0 : 1);
+/** A single day marker in the streak row; each pops in turn, today ignites. */
+function DayChip({ day, isToday, delay }: { day: number; isToday: boolean; delay: number }) {
+  const pop = useSharedValue(0);
 
   useEffect(() => {
-    if (isToday) {
-      pop.value = withDelay(650, withSpring(1, { damping: 7, stiffness: 160 }));
-    }
-  }, [isToday, pop]);
+    pop.value = withDelay(delay, withSpring(1, { damping: 7, stiffness: 170 }));
+  }, [delay, pop]);
 
   const style = useAnimatedStyle(() => ({
-    transform: [{ scale: 0.6 + 0.4 * pop.value }],
-    opacity: 0.4 + 0.6 * pop.value,
+    transform: [{ scale: 0.5 + 0.5 * pop.value }],
+    opacity: pop.value,
   }));
 
   return (
     <View style={styles.dayChip}>
       <Animated.View style={[styles.dayFlame, isToday && styles.dayFlameToday, style]}>
-        <Ionicons
-          name="flame"
-          size={18}
-          color={isToday ? palette.white : palette.amber400}
-        />
+        <Ionicons name="flame" size={18} color={isToday ? palette.coral500 : palette.white} />
       </Animated.View>
-      <Text variant="caption" color={isToday ? colors.textPrimary : colors.textMuted}>
+      <Text variant="caption" color={palette.white}>
         {day}
       </Text>
     </View>
@@ -480,22 +506,29 @@ const styles = StyleSheet.create({
   flameWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 200,
+    height: 240,
   },
-  flameGlow: {
+  rays: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: radius.pill,
-    backgroundColor: palette.amber400,
+    width: 340,
+    height: 340,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  flameCount: { position: 'absolute', top: 62 },
-  flameNumber: { fontSize: 56, lineHeight: 60 },
+  ray: {
+    position: 'absolute',
+    width: 22,
+    height: 340,
+    borderRadius: 11,
+    backgroundColor: palette.white,
+  },
+  streakNumber: { fontSize: 72, lineHeight: 78, fontWeight: '900', marginTop: spacing.sm },
+  streakSub: { opacity: 0.92, marginTop: spacing.xs },
   daysRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.md,
-    marginVertical: spacing.sm,
+    marginVertical: spacing.md,
   },
   dayChip: { alignItems: 'center', gap: spacing.xs },
   dayFlame: {
@@ -504,9 +537,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.5)',
   },
-  dayFlameToday: { backgroundColor: palette.amber500, borderColor: palette.amber400 },
+  dayFlameToday: { backgroundColor: palette.white, borderColor: palette.white },
 });
