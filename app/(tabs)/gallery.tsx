@@ -1,8 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Card, EmptyState, LoadingState, Pill, Screen, Text } from '@/components';
 import { useMyGallery } from '@/features/missions/hooks';
@@ -54,18 +61,32 @@ export default function GalleryScreen() {
         />
       ) : (
         <View style={styles.list}>
-          {data?.map((item) => <GalleryCard key={item.id} item={item} />)}
+          {data?.map((item, i) => <GalleryCard key={item.id} item={item} index={i} />)}
         </View>
       )}
     </Screen>
   );
 }
 
-function GalleryCard({ item }: { item: GalleryItem }) {
+function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
   const status = STATUS_META[item.status] ?? { label: item.status, color: colors.textMuted };
   const diff = item.mission ? difficultyMeta[item.mission.difficulty] : undefined;
 
+  // Stagger each card in as the gallery loads.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(24);
+  useEffect(() => {
+    const delay = Math.min(index, 8) * 70;
+    opacity.value = withDelay(delay, withTiming(1, { duration: 320 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 15, stiffness: 130 }));
+  }, [index, opacity, translateY]);
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
   return (
+    <Animated.View style={animStyle}>
     <Card elevated style={styles.card}>
       <View style={styles.header}>
         <View style={styles.headerText}>
@@ -104,6 +125,7 @@ function GalleryCard({ item }: { item: GalleryItem }) {
         </Text>
       ) : null}
     </Card>
+    </Animated.View>
   );
 }
 

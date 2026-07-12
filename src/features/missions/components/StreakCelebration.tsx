@@ -116,19 +116,39 @@ export function StreakCelebration({
         ) : null}
 
         <View style={styles.body}>
-          {step === 'spontania' ? (
-            <SpontaniaStep photoUri={photoUri} onContinue={next} />
-          ) : step === 'selfie' ? (
-            <SelfieStep selfieUri={selfieUri} onCapture={captureSelfie} onContinue={next} />
-          ) : step === 'ad' ? (
-            <AdStep onContinue={next} />
-          ) : (
-            <StreakStep from={fromStreak} to={toStreak} onContinue={onDone} />
-          )}
+          <StepShell key={step}>
+            {step === 'spontania' ? (
+              <SpontaniaStep photoUri={photoUri} onContinue={next} />
+            ) : step === 'selfie' ? (
+              <SelfieStep selfieUri={selfieUri} onCapture={captureSelfie} onContinue={next} />
+            ) : step === 'ad' ? (
+              <AdStep onContinue={next} />
+            ) : (
+              <StreakStep from={fromStreak} to={toStreak} onContinue={onDone} />
+            )}
+          </StepShell>
         </View>
       </View>
     </Modal>
   );
+}
+
+/** Fades + lifts each step in as it becomes active (keyed by step to remount). */
+function StepShell({ children }: { children: React.ReactNode }) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(18);
+
+  useEffect(() => {
+    opacity.value = withTiming(1, { duration: 340 });
+    translateY.value = withSpring(0, { damping: 15, stiffness: 130 });
+  }, [opacity, translateY]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return <Animated.View style={style}>{children}</Animated.View>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -224,7 +244,22 @@ const AD_SECONDS = 5;
 function AdStep({ onContinue }: { onContinue: () => void }) {
   const [remaining, setRemaining] = useState(AD_SECONDS);
 
+  const pulse = useSharedValue(1);
+  const shimmer = useSharedValue(0);
+  const progress = useSharedValue(0);
+
   useEffect(() => {
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1.12, { duration: 620, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 620, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+    shimmer.value = withRepeat(withTiming(1, { duration: 1600, easing: Easing.linear }), -1, false);
+    progress.value = withTiming(1, { duration: AD_SECONDS * 1000, easing: Easing.linear });
+
     const started = Date.now();
     const id = setInterval(() => {
       const left = Math.max(0, AD_SECONDS - Math.floor((Date.now() - started) / 1000));
@@ -232,7 +267,13 @@ function AdStep({ onContinue }: { onContinue: () => void }) {
       if (left === 0) clearInterval(id);
     }, 250);
     return () => clearInterval(id);
-  }, []);
+  }, [pulse, shimmer, progress]);
+
+  const rocketStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }));
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -180 + shimmer.value * 520 }, { rotate: '18deg' }],
+  }));
+  const barStyle = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
 
   const canSkip = remaining === 0;
 
@@ -251,7 +292,10 @@ function AdStep({ onContinue }: { onContinue: () => void }) {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Ionicons name="rocket" size={40} color={palette.white} />
+          <Animated.View style={[styles.adShimmer, shimmerStyle]} pointerEvents="none" />
+          <Animated.View style={rocketStyle}>
+            <Ionicons name="rocket" size={40} color={palette.white} />
+          </Animated.View>
           <Text variant="heading" color={palette.white} center>
             המותג שלכם כאן
           </Text>
@@ -270,6 +314,10 @@ function AdStep({ onContinue }: { onContinue: () => void }) {
             <Ionicons name="open-outline" size={14} color={colors.primary} />
           </View>
         </View>
+      </View>
+
+      <View style={styles.adBarTrack}>
+        <Animated.View style={[styles.adBarFill, barStyle]} />
       </View>
 
       <Button
@@ -349,6 +397,8 @@ function StreakStep({
   // Big flame: bounce in with overshoot, then a gentle continuous flicker.
   const scale = useSharedValue(0);
   const flicker = useSharedValue(1);
+  const wave = useSharedValue(0); // shockwave ring at ignition
+  const numScale = useSharedValue(1); // number pops when it lands
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
@@ -364,17 +414,30 @@ function StreakStep({
       -1,
       true,
     );
+    wave.value = withDelay(260, withTiming(1, { duration: 640, easing: Easing.out(Easing.quad) }));
+    numScale.value = withDelay(
+      1040,
+      withSequence(
+        withSpring(1.3, { damping: 6, stiffness: 190 }),
+        withSpring(1, { damping: 11, stiffness: 200 }),
+      ),
+    );
     // A heavier haptic lands right as the count finishes climbing — the "wow".
     const t = setTimeout(
       () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {}),
       1100,
     );
     return () => clearTimeout(t);
-  }, [scale, flicker]);
+  }, [scale, flicker, wave, numScale]);
 
   const flameStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value * flicker.value }],
   }));
+  const waveStyle = useAnimatedStyle(() => ({
+    opacity: 0.5 * (1 - wave.value),
+    transform: [{ scale: 0.3 + wave.value * 1.9 }],
+  }));
+  const numStyle = useAnimatedStyle(() => ({ transform: [{ scale: numScale.value }] }));
 
   // Rolling window of up to 5 days ending on the new streak.
   const windowEnd = Math.max(to, 1);
@@ -388,14 +451,17 @@ function StreakStep({
 
       <View style={styles.flameWrap}>
         <SunburstRays />
+        <Animated.View style={[styles.flameWave, waveStyle]} pointerEvents="none" />
         <Animated.View style={flameStyle}>
           <Ionicons name="flame" size={150} color={palette.white} />
         </Animated.View>
       </View>
 
-      <Text color={palette.white} style={styles.streakNumber} center>
-        {count}
-      </Text>
+      <Animated.View style={numStyle}>
+        <Text color={palette.white} style={styles.streakNumber} center>
+          {count}
+        </Text>
+      </Animated.View>
       <Text variant="title" color={palette.white} center>
         {to === 1 ? 'יום ברצף!' : 'ימים ברצף!'}
       </Text>
@@ -498,9 +564,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.xxxl,
+    overflow: 'hidden',
+  },
+  adShimmer: {
+    position: 'absolute',
+    top: -40,
+    bottom: -40,
+    width: 70,
+    backgroundColor: 'rgba(255,255,255,0.22)',
   },
   adBottom: { padding: spacing.lg, gap: spacing.sm, alignItems: 'center' },
   adCta: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  adBarTrack: {
+    height: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceElevated,
+    overflow: 'hidden',
+  },
+  adBarFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.reward },
 
   // Streak reveal
   flameWrap: {
@@ -520,6 +601,13 @@ const styles = StyleSheet.create({
     width: 22,
     height: 340,
     borderRadius: 11,
+    backgroundColor: palette.white,
+  },
+  flameWave: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: radius.pill,
     backgroundColor: palette.white,
   },
   streakNumber: { fontSize: 72, lineHeight: 78, fontWeight: '900', marginTop: spacing.sm },
